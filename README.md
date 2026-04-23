@@ -1,0 +1,1 @@
+# windrose-dedicated-server-docker-helm
