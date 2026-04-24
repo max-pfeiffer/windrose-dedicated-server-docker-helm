@@ -1,0 +1,25 @@
+[project]
+name = "windrose-dedicated-server-docker-helm"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Max Pfeiffer",email = "max@maxpfeiffer.ch"}
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.13,<4"
+dependencies = [
+    "click (>=8.3.3,<9.0.0)",
+    "python-on-whales (>=0.81.0,<0.82.0)"
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit (>=4.6.0,<5.0.0)",
+    "pytest (>=9.0.3,<10.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
