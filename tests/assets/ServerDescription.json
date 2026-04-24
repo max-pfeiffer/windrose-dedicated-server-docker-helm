@@ -1,0 +1,20 @@
+{
+        "Version": 1,
+        "DeploymentId": "0.10.0.3.104-256f9653",
+        "ServerDescription_Persistent":
+        {
+                "PersistentServerId": "9BE66DD44655244015C1B3AC3CE4515A",
+                "InviteCode": "d2be7c90",
+                "IsPasswordProtected": false,
+                "Password": "",
+                "ServerName": "",
+                "WorldIslandId": "1EDB437B925C493C86998DADB3D5CA90",
+                "MaxPlayerCount": 8,
+                "UserSelectedRegion": "",
+                "P2pProxyAddress": "127.0.0.1",
+                "UseDirectConnection": false,
+                "DirectConnectionServerAddress": "",
+                "DirectConnectionServerPort": -1,
+                "DirectConnectionProxyAddress": "0.0.0.0"
+        }
+}
