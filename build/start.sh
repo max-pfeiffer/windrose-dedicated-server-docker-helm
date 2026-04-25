@@ -17,21 +17,21 @@ if [ ! -f "$SERVER_DESCRIPTION" ]; then
 
   if [ ! -f "$SERVER_DESCRIPTION" ]; then
     echo "Error: Failed to generate ServerDescription.json"
-    kill "$RUN_PID" 2>/dev/null
-    wait "$RUN_PID" 2>/dev/null
-    wineserver -k 2>/dev/null
+    kill "$RUN_PID"
+    wait "$RUN_PID"
+    wineserver -k
     exit 1
   fi
 
-  kill "$RUN_PID" 2>/dev/null
-  wait "$RUN_PID" 2>/dev/null
-  wineserver -k 2>/dev/null
+  kill "$RUN_PID"
+  wait "$RUN_PID"
+  wineserver -k
   sleep 2
   echo "ServerDescription.json created"
 fi
 
 echo "Modifying ServerDescription.json ..."
-python3 ServerDescription.json "$SERVER_DESCRIPTION"
+python3 update_server_description.py "$SERVER_DESCRIPTION"
 echo "ServerDescription.json modified"
 
 echo "Starting the server ..."
