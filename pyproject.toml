@@ -1,0 +1,55 @@
+[project]
+name = "windrose-dedicated-server-docker-helm"
+version = "0.1.0"
+description = "Windrose dedicated server - Docker image and Helm chart"
+authors = [
+    {name = "Max Pfeiffer",email = "max@maxpfeiffer.ch"}
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.13,<4"
+dependencies = [
+    "click (>=8.3.3,<9.0.0)",
+    "python-on-whales (>=0.81.0,<0.82.0)",
+    "steam[client] (>=1.4.4,<2.0.0)",
+]
+
+[dependency-groups]
+dev = [
+    "bcrypt (==5.0.0)",
+    "furl (==2.1.4)",
+    "pre-commit (>=4.6.0,<5.0.0)",
+    "pytest (>=9.0.3,<10.0.0)",
+    "pytest-mock (>=3.15.1,<4.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)",
+    "testcontainers (==4.14.2)"
+]
+
+[tool.ruff]
+src = ["build", "tests"]
+extend-exclude = ["charts", "examples"]
+
+[tool.ruff.lint]
+select = [
+    "F", # Pyflakes
+    "E", # pycodestyle
+    "W", # pycodestyle
+    "I", # isort
+    "D",   # pydocstyle
+    "UP",  # pyupgrade
+    "ASYNC", # flake8-async
+    "RUF",  # Ruff-specific rules
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+# https://docs.pytest.org/en/latest/reference/customize.html
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

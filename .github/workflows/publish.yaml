@@ -1,0 +1,12 @@
+name: Publish Docker Image
+
+on:
+  schedule:
+    - cron: "15 1 * * *"
+
+jobs:
+  call-publish-docker-image:
+    uses: ./.github/workflows/docker-image.yaml
+    secrets:
+      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+      DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
