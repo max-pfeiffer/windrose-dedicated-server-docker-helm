@@ -30,5 +30,9 @@ if [ ! -f "$SERVER_DESCRIPTION" ]; then
   echo "ServerDescription.json created"
 fi
 
+echo "Modifying ServerDescription.json ..."
+python3 ServerDescription.json "$SERVER_DESCRIPTION"
+echo "ServerDescription.json modified"
+
 echo "Starting the server ..."
 xvfb-run --auto-servernum wine "$SERVER_EXECUTABLE" -log

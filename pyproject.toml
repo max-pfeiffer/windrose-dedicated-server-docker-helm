@@ -16,9 +16,35 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pre-commit (>=4.6.0,<5.0.0)",
-    "pytest (>=9.0.3,<10.0.0)"
+    "pytest (>=9.0.3,<10.0.0)",
+    "pytest-mock (>=3.15.1,<4.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)"
 ]
 
+[tool.ruff]
+src = ["build", "tests"]
+extend-exclude = ["charts", "examples"]
+
+[tool.ruff.lint]
+select = [
+    "F", # Pyflakes
+    "E", # pycodestyle
+    "W", # pycodestyle
+    "I", # isort
+    "D",   # pydocstyle
+    "UP",  # pyupgrade
+    "ASYNC", # flake8-async
+    "RUF",  # Ruff-specific rules
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+# https://docs.pytest.org/en/latest/reference/customize.html
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
