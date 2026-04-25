@@ -24,7 +24,7 @@ def server_description_path() -> Generator[Path, Any]:
         )
         tmp_server_description_path = Path(tmpdir) / "ServerDescription.json"
         copyfile(server_description_path, tmp_server_description_path)
-        yield server_description_path
+        yield tmp_server_description_path
 
 
 @pytest.fixture(scope="session")
