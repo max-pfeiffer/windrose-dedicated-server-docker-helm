@@ -28,6 +28,7 @@ RUN apt-get update \
     python3 \
     xvfb \
     xauth \
+    winbind \
     vim \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -52,7 +53,7 @@ COPY --from=install-stage --chown=windrose:windrose /srv/windrose /srv/windrose
 
 COPY --chown=windrose:windrose start.sh /srv/windrose/start.sh
 
-COPY --chown=windrose:windrose supdate_server_description.py /srv/windrose/update_server_description.py
+COPY --chown=windrose:windrose update_server_description.py /srv/windrose/update_server_description.py
 
 RUN chmod +x /srv/windrose/start.sh
 
@@ -64,11 +65,9 @@ ENV WINEPREFIX=/home/windrose/.wine \
 RUN Xvfb :0 -screen 0 1024x768x16 & \
     sleep 2 && \
     su -l windrose -c "WINEPREFIX=/home/steam/.wine WINEARCH=win64 WINEDLLOVERRIDES='mscoree,mshtml=' winecfg -v win10 >/dev/null 2>&1; wineboot --init >/dev/null 2>&1" && \
-    kill %1 2>/dev/null; true \
+    kill %1 2>/dev/null; true
 
 # Use the unpriviledged user to run the application
 USER 10001
 
-#ENTRYPOINT ["/srv/windrose/start.sh"]
-
-CMD /bin/bash
+ENTRYPOINT ["/srv/windrose/start.sh"]

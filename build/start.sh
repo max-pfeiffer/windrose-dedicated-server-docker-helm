@@ -2,6 +2,7 @@
 
 SERVER_EXECUTABLE=/srv/windrose/R5/Binaries/Win64/WindroseServer-Win64-Shipping.exe
 SERVER_DESCRIPTION=/srv/windrose/R5/ServerDescription.json
+SERVER_LOGFILE=/srv/windrose/R5/Saved/Logs/R5.log
 COUNTER=0
 
 echo "Starting Windrose Dedicated Server"
@@ -35,4 +36,6 @@ python3 update_server_description.py "$SERVER_DESCRIPTION"
 echo "ServerDescription.json modified"
 
 echo "Starting the server ..."
-xvfb-run --auto-servernum wine "$SERVER_EXECUTABLE" -log
+xvfb-run --auto-servernum wine "$SERVER_EXECUTABLE" >/dev/null 2>&1 &
+
+tail -f "$SERVER_LOGFILE"
