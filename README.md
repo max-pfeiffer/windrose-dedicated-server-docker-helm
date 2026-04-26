@@ -3,6 +3,9 @@
 [![codecov](https://codecov.io/gh/max-pfeiffer/windrose-dedicated-server-docker-helm/graph/badge.svg?token=4xXsgY0nah)](https://codecov.io/gh/max-pfeiffer/windrose-dedicated-server-docker-helm)
 [![Code Quality](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/code-quality.yaml/badge.svg)](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/code-quality.yaml)
 [![Test Image Build](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/test-image-build.yaml/badge.svg)](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/test-image-build.yaml)
+[![Publish Docker Image](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/publish.yaml/badge.svg)](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/publish.yaml)
+![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/pfeiffermax/windrose-dedicated-server?sort=semver)
+![Docker Pulls](https://img.shields.io/docker/pulls/pfeiffermax/windrose-dedicated-server)
 
 # Windrose Dedicated Server - Docker Image and Helm Chart
 This Docker image provides a [Windrose](https://playwindrose.com/) dedicated game server.
