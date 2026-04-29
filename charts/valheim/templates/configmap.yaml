@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "valheim.fullname" . }}
+  labels:
+    {{- include "valheim.labels" . | nindent 4 }}
+data:
+  {{- range $i, $instance := .Values.instances }}
+  {{ include "valheim.fullname" $ }}-{{ $i }}: |
+  {{- range $key, $value := $instance }}
+  {{- if not (has $key (list "password" "service")) }}
+    {{- if eq $key "crossPlay" }}
+    {{- if $value }}
+    {{ $key }}=-crossplay
+    {{- else }}
+    {{ $key }}=
+    {{- end }}
+    {{- else }}
+    {{ $key }}={{ $value }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- end }}

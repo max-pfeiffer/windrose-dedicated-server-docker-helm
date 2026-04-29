@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "valheim.fullname" . }}
+  labels:
+    {{- include "valheim.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "valheim.fullname" . }}
+  replicas: {{ len .Values.instances }}
+  selector:
+    matchLabels:
+      {{- include "valheim.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "valheim.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "-name"
+            - "$name"
+            - "-world"
+            - "$world"
+            - "-password"
+            - "$password"
+            - "-port"
+            - "{{ .Values.valheimDedicatedServer.port }}"
+            - "-public"
+            - "$public"
+            - "-saveinterval"
+            - "$saveInterval"
+            - "-backups"
+            - "$backups"
+            - "-backupshort"
+            - "$backupShort"
+            - "-backuplong"
+            - "$backupLong"
+            - "-savedir"
+            - "/srv/valheim/saves"
+            - "instanceid"
+            - "$(POD_NAME)"
+            - "$crossPlay"
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CONFIG_FILE_PATH
+              value: "/srv/valheim/config/$(POD_NAME)"
+            - name: SECRET_FILE_PATH
+              value: "/srv/valheim/secret/$(POD_NAME)"
+          ports:
+            - name: server-port
+              containerPort: {{ .Values.valheimDedicatedServer.port }}
+              protocol: UDP
+            - name: query-port
+              containerPort: {{ add .Values.valheimDedicatedServer.port 1 }}
+              protocol: UDP
+          startupProbe:
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+            exec:
+              command:
+                - "nc"
+                - "-nuzv"
+                - "127.0.0.1"
+                - "{{ .Values.valheimDedicatedServer.port }}"
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            exec:
+              command:
+                - "nc"
+                - "-nuzv"
+                - "127.0.0.1"
+                - "{{ .Values.valheimDedicatedServer.port }}"
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: saves-directory
+              mountPath: "/srv/valheim/saves"
+            - name: config
+              mountPath: "/srv/valheim/config"
+            - name: secret
+              mountPath: "/srv/valheim/secret"
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "valheim.fullname" $ }}
+        - name: secret
+          secret:
+            secretName: {{ include "valheim.fullname" $ }}
+  volumeClaimTemplates:
+  - metadata:
+      name: saves-directory
+    spec:
+      accessModes:
+        - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: {{ .Values.valheimDedicatedServer.volumeStorageSize }}

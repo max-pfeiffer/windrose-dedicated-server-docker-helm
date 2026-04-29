@@ -1,0 +1,3 @@
+Access the instance through the following services:
+1. Headless Service
+2. Pod Services

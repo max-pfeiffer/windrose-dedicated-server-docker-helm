@@ -1,0 +1,128 @@
+# Default values for rust.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+image:
+  repository: "pfeiffermax/valheim-dedicated-server"
+  # This sets the pull policy for images.
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  # Please see Docker Hub for available tags: https://hub.docker.com/r/pfeiffermax/rust-game-server/tags
+  tag: "latest"
+
+# This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+# This is for setting Kubernetes Annotations to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: RuntimeDefault
+
+# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+headlessService:
+  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  type: ClusterIP
+  metadata:
+    annotations: {}
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Valheim dedicated server startup is slow, so you might need to bump up periodSeconds and failureThreshold
+# if you see the startup probe failing.
+startupProbe:
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 100
+  successThreshold: 1
+
+livenessProbe:
+  initialDelaySeconds: 0
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+
+valheimDedicatedServer:
+  # Port which you want the server to communicate with. Valheim uses the specified Port AND specified Port+1.
+  # Default Ports are 2456-2457.
+  port: 2456
+  # Size of the volume the server uses for its saves directory.
+  volumeStorageSize: "1Gi"
+  # Name of the existing secret to use for the server password.
+  # If this is set, valheimDedicatedServer.password will be ignored.
+  # The existing secret needs to have stored Valheim server password under the key password.
+  existingSecret: ""
+
+# You can choose to run multiple instances of Rust dedicated servers here.
+# For a new instance add another entry to this list.
+instances:
+    # Name of your server that will be visible in the Server list.
+    # You can use just one single string without any spaces as this is specified as command line option.
+  - name: "ValheimServer"
+    # A World with the name entered will be created. You may also choose an already existing World by entering its name.
+    world: "NewWorld"
+    # Server password
+    # ATTENTION: needs to be at least 5 characters long, otherwise the server startup fails!
+    password: "supersecret"
+    # Set the visibility of your server. 1 is default and will make the server visible in the browser.
+    # Set it to 0 to make the server invisible and only joinable via the ‘Join IP’-button.
+    public: "1"
+    # Runs the Server on the Crossplay backend (PlayFab), which lets users from any platform join.
+    # If you set it to false, the Steam backend is used, which means only Steam users can see and join the Server.
+    crossPlay: false
+    # How often the world will save in seconds.
+    saveInterval: "1800"
+    # Sets how many automatic backups will be kept. The first is the ‘short’ backup length,
+    # and the rest are the ‘long’ backup length.
+    # By default, that means one backup that is 2 hours old, and 3 backups that are 12 hours apart.
+    backups: "4"
+    # Sets the interval between the first automatic backups.
+    backupShort: "7200"
+    # Sets the interval between the subsequent automatic backups.
+    backupLong: "43200"
+    # Pod specific service
+    service:
+      type: LoadBalancer
+      externalTrafficPolicy: Cluster
+      metadata:
+        labels: {}
+        annotations: {}
