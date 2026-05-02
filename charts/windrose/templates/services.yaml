@@ -12,13 +12,13 @@ spec:
   type: {{ .Values.headlessService.type }}
   clusterIP: None
   ports:
-    - name: server-port
+    - name: server-port-tcp
       port: {{ .Values.windroseDedicatedServer.port }}
-      targetPort: server-port
-      protocol: UDP
-    - name: query-port
-      port: {{ add .Values.windroseDedicatedServer.port 1 }}
-      targetPort: query-port
+      targetPort: server-port-tcp
+      protocol: TCP
+    - name: server-port-udp
+      port: {{ .Values.windroseDedicatedServer.port }}
+      targetPort: server-port-udp
       protocol: UDP
   selector:
     {{- include "windrose.selectorLabels" . | nindent 4 }}
@@ -41,13 +41,13 @@ spec:
   type: {{ $instance.service.type }}
   externalTrafficPolicy: {{ $instance.service.externalTrafficPolicy }}
   ports:
-    - name: server-port
-      port: {{ $.Values.windroseDedicatedServer.port }}
-      targetPort: server-port
-      protocol: UDP
-    - name: query-port
-      port: {{ add $.Values.windroseDedicatedServer.port 1 }}
-      targetPort: query-port
+    - name: server-port-tcp
+      port: {{ .Values.windroseDedicatedServer.port }}
+      targetPort: server-port-tcp
+      protocol: TCP
+    - name: server-port-udp
+      port: {{ .Values.windroseDedicatedServer.port }}
+      targetPort: server-port-udp
       protocol: UDP
   selector:
     statefulset.kubernetes.io/pod-name: {{ include "windrose.fullname" $ }}-{{ $i }}

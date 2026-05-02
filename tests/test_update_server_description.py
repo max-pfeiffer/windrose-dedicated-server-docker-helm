@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-from build.update_server_description import main, parse_args
+from build.scripts.update_server_description import main, parse_args
 from pytest import MonkeyPatch
 from pytest_mock import MockerFixture
 

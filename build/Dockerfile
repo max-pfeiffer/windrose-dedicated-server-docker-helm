@@ -51,9 +51,9 @@ RUN chown -R windrose:windrose /srv/windrose
 
 COPY --from=install-stage --chown=windrose:windrose /srv/windrose /srv/windrose
 
-COPY --chown=windrose:windrose start.sh /srv/windrose/start.sh
+COPY --chown=windrose:windrose scripts/start.sh /srv/windrose/start.sh
 
-COPY --chown=windrose:windrose update_server_description.py /srv/windrose/update_server_description.py
+COPY --chown=windrose:windrose scripts/update_server_description.py /srv/windrose/update_server_description.py
 
 RUN chmod +x /srv/windrose/start.sh
 

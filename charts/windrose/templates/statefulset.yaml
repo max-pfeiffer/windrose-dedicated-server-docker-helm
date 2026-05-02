@@ -34,45 +34,17 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args:
-            - "-name"
-            - "$name"
-            - "-world"
-            - "$world"
-            - "-password"
-            - "$password"
-            - "-port"
-            - "{{ .Values.windroseDedicatedServer.port }}"
-            - "-public"
-            - "$public"
-            - "-saveinterval"
-            - "$saveInterval"
-            - "-backups"
-            - "$backups"
-            - "-backupshort"
-            - "$backupShort"
-            - "-backuplong"
-            - "$backupLong"
-            - "-savedir"
-            - "/srv/windrose/saves"
-            - "instanceid"
-            - "$(POD_NAME)"
-            - "$crossPlay"
           env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
             - name: CONFIG_FILE_PATH
               value: "/srv/windrose/config/$(POD_NAME)"
             - name: SECRET_FILE_PATH
               value: "/srv/windrose/secret/$(POD_NAME)"
           ports:
-            - name: server-port
+            - name: server-port-tcp
               containerPort: {{ .Values.windroseDedicatedServer.port }}
               protocol: UDP
-            - name: query-port
-              containerPort: {{ add .Values.windroseDedicatedServer.port 1 }}
+            - name: server-port-udp
+              containerPort: {{ .Values.windroseDedicatedServer.port }}
               protocol: UDP
           startupProbe:
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
@@ -102,7 +74,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: saves-directory
-              mountPath: "/srv/windrose/saves"
+              mountPath: "/srv/windrose/R5/Saved"
             - name: config
               mountPath: "/srv/windrose/config"
             - name: secret

@@ -95,31 +95,32 @@ windroseDedicatedServer:
 # You can choose to run multiple instances of Rust dedicated servers here.
 # For a new instance add another entry to this list.
 instances:
-    # Name of your server that will be visible in the Server list.
-    # You can use just one single string without any spaces as this is specified as command line option.
+    # Name of your server. Helpful if invite codes look similar
   - name: "WindroseServer"
-    # A World with the name entered will be created. You may also choose an already existing World by entering its name.
-    world: "NewWorld"
     # Server password
-    # ATTENTION: needs to be at least 5 characters long, otherwise the server startup fails!
     password: "supersecret"
-    # Set the visibility of your server. 1 is default and will make the server visible in the browser.
-    # Set it to 0 to make the server invisible and only joinable via the ‘Join IP’-button.
-    public: "1"
-    # Runs the Server on the Crossplay backend (PlayFab), which lets users from any platform join.
-    # If you set it to false, the Steam backend is used, which means only Steam users can see and join the Server.
-    crossPlay: false
-    # How often the world will save in seconds.
-    saveInterval: "1800"
-    # Sets how many automatic backups will be kept. The first is the ‘short’ backup length,
-    # and the rest are the ‘long’ backup length.
-    # By default, that means one backup that is 2 hours old, and 3 backups that are 12 hours apart.
-    backups: "4"
-    # Sets the interval between the first automatic backups.
-    backupShort: "7200"
-    # Sets the interval between the subsequent automatic backups.
-    backupLong: "43200"
-    # Pod specific service
+    # Invite code to find your server. 0-9, a-z and A-Z symbols are allowed. Should contain at least 6 symbols.
+    # Case sensitive.
+    inviteCode: ""
+    # Maximum number of simultaneous players on your server.
+    maxPlayerCount: "5"
+    # Specifies the region for the Connection Service. Supported options: SEA, CIS, EU (EU covers both EU & NA).
+    # If left empty, the server will automatically detect and select the optimal region based on latency. If desired
+    # region is specified (for example, EU), the server will use that region exclusively.
+    userSelectedRegion: ""
+    # IP Address for listening sockets.
+    p2pProxyAddress: ""
+    # If true, the server will create sockets for direct connection with clients. If false, the server will use ICE
+    # protocol to establish P2P connection.
+    useDirectConnection: "true"
+    # Address for direct connection. For future purposes. Not used now.
+    directConnectionServerAddress: ""
+    # Port for direct connection. Should be available for TCP and UDP connection if UseDirectConnection is true.
+    directConnectionServerPort: "28050"
+    # Can be used to choose specified network on computer where server with direct connection is running.
+    # 0.0.0.0 should be used by default.
+    directConnectionProxyAddress: "0.0.0.0"
+    # Service configuration for this instance
     service:
       type: LoadBalancer
       externalTrafficPolicy: Cluster
