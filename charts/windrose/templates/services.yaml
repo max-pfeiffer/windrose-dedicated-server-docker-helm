@@ -42,11 +42,11 @@ spec:
   externalTrafficPolicy: {{ $instance.service.externalTrafficPolicy }}
   ports:
     - name: server-port-tcp
-      port: {{ .Values.windroseDedicatedServer.port }}
+      port: {{ $.Values.windroseDedicatedServer.port }}
       targetPort: server-port-tcp
       protocol: TCP
     - name: server-port-udp
-      port: {{ .Values.windroseDedicatedServer.port }}
+      port: {{ $.Values.windroseDedicatedServer.port }}
       targetPort: server-port-udp
       protocol: UDP
   selector:
