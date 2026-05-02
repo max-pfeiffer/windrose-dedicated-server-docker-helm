@@ -1,6 +1,6 @@
 apiVersion: v2
-name: valheim
-description: A Helm chart for running a Valheim dedicated server on Kubernetes
+name: windrose
+description: A Helm chart for running a Windrose dedicated server on Kubernetes
 
 # A chart can be either an 'application' or a 'library' chart.
 #

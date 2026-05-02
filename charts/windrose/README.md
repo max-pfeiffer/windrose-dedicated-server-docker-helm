@@ -1,34 +1,34 @@
-# Valheim Helm Chart
-A [Helm chart](https://helm.sh/) for running a Valheim dedicated server. Since v1.0.0 this Helm chart supports running multiple
+# Windrose Helm Chart
+A [Helm chart](https://helm.sh/) for running a Windrose dedicated server. Since v1.0.0 this Helm chart supports running multiple
 server instances using one StatefulSet. 
 
 ## Installation
-If you want to run Valheim on a bare metal Kubernetes cluster, I recommend reading
+If you want to run Windrose on a bare metal Kubernetes cluster, I recommend reading
 [my blog post](https://max-pfeiffer.github.io/blog/hosting-game-servers-on-bare-metal-kubernetes-with-kube-vip.html)
 about that topic.
 
 ### Helm
 You can run multiple server instance with each Helm installation. Please be aware that with a StatefulSet Kubernetes
-starts additional instances only after the first instance is in ready state. And Valheim server startup is slow,
-so it might take a while until your Valheim server fleet is up and running completely.
+starts additional instances only after the first instance is in ready state. And Windrose server startup is slow,
+so it might take a while until your Windrose server fleet is up and running completely.
 It might better suit your needs to install multiple StatefulSets with separate Helm releases.
 
 The installation is done as follows:
 ```shell
-$ helm repo add valheim https://max-pfeiffer.github.io/valheim-dedicated-server-docker-helm
-$ helm install valheim valheim/valheim --values your_values.yaml --namespace yournamespace 
+$ helm repo add windrose https://max-pfeiffer.github.io/windrose-dedicated-server-docker-helm
+$ helm install windrose windrose/windrose --values your_values.yaml --namespace yournamespace 
 ```
 
 ### Argo CD
-I recommend deploying and running the Valheim dedicated server with [Argo CD](https://argoproj.github.io/cd/). This way
+I recommend deploying and running the Windrose dedicated server with [Argo CD](https://argoproj.github.io/cd/). This way
 you have a declarative installation of your server. It's very easy to manage and update it that way.
 A big plus is also the [Argo CD Image Updater](https://github.com/argoproj-labs/argocd-image-updater). This tool can
-monitor the [Valheim Docker Image](https://hub.docker.com/r/pfeiffermax/valheim-dedicated-server) and will update your
-Valheim installation automatically when a new image is released.
+monitor the [Windrose Docker Image](https://hub.docker.com/r/pfeiffermax/windrose-dedicated-server) and will update your
+Windrose installation automatically when a new image is released.
 
 ## Configuration options
 ### Security Context
-As the `pfeiffermax/valheim-dedicated-server` image runs the Rust server with an unprivileged user since V2.0.0,
+As the `pfeiffermax/windrose-dedicated-server` image runs the Rust server with an unprivileged user since V2.0.0,
 secure default values for `podSecurityContext` and `securityContext` were added.
 ```yaml
 podSecurityContext:
@@ -50,7 +50,7 @@ If that doesn't suit your needs, just override these defaults.
 
 ### Resources
 Make sure to get the resource specs right. You will need at least two CPU cores and 2GB of RAM.
-[Using 4GB of RAM is recommended](https://valheim.fandom.com/wiki/Dedicated_servers#Requirements):
+[Using 4GB of RAM is recommended](https://windrose.fandom.com/wiki/Dedicated_servers#Requirements):
 ```yaml
 resources:
   limits:
@@ -62,10 +62,10 @@ resources:
 ```
 Especially RAM is quite critical as Kubernetes is evicting/kills the Pod when it overshoots that resource limit. So
 you want to check your monitoring and adjust `resource.limits.memory` when you see that happening. It's generally a
-good idea to set the limit a bit higher than what you think the Valheim server will request.
+good idea to set the limit a bit higher than what you think the Windrose server will request.
 
 ### Startup Probe
-Valheim server startup is rather slow. This is mainly due to generating the world. So you might need to raise the
+Windrose server startup is rather slow. This is mainly due to generating the world. So you might need to raise the
 `failureThreshold` when you see the startup probe failing. Multiply `periodSeconds` with `failureThreshold` to get
 the maximum time for startup. These settings did work for me:
 ```yaml
@@ -74,8 +74,8 @@ startupProbe:
   failureThreshold: 100
 ```
 
-### Valheim server config
-Tweak the Valheim server config to your liking. You can add a list of server to `instances`. Please be aware that the
+### Windrose server config
+Tweak the Windrose server config to your liking. You can add a list of server to `instances`. Please be aware that the
 configuration of resources and ports are shared by these instances.
 ```yaml
 # You can choose to run multiple instances of Rust dedicated servers here.
@@ -83,7 +83,7 @@ configuration of resources and ports are shared by these instances.
 instances:
     # Name of your server that will be visible in the Server list.
     # You can use just one single string without any spaces as this is specified as command line option.
-  - name: "ValheimServer"
+  - name: "WindroseServer"
     # A World with the name entered will be created. You may also choose an already existing World by entering its name.
     world: "NewWorld"
     # Server password

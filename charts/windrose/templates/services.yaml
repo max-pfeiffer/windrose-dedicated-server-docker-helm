@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "valheim.fullname" . }}
+  name: {{ include "windrose.fullname" . }}
   labels:
-    {{- include "valheim.labels" . | nindent 4 }}
+    {{- include "windrose.labels" . | nindent 4 }}
   {{- with .Values.headlessService.metadata.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -13,23 +13,23 @@ spec:
   clusterIP: None
   ports:
     - name: server-port
-      port: {{ .Values.valheimDedicatedServer.port }}
+      port: {{ .Values.windroseDedicatedServer.port }}
       targetPort: server-port
       protocol: UDP
     - name: query-port
-      port: {{ add .Values.valheimDedicatedServer.port 1 }}
+      port: {{ add .Values.windroseDedicatedServer.port 1 }}
       targetPort: query-port
       protocol: UDP
   selector:
-    {{- include "valheim.selectorLabels" . | nindent 4 }}
+    {{- include "windrose.selectorLabels" . | nindent 4 }}
 ---
 {{- range $i, $instance := .Values.instances }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "valheim.fullname" $ }}-{{ $i }}
+  name: {{ include "windrose.fullname" $ }}-{{ $i }}
   labels:
-    {{- include "valheim.labels" $ | nindent 4 }}
+    {{- include "windrose.labels" $ | nindent 4 }}
     {{- with $instance.service.metadata.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -42,14 +42,14 @@ spec:
   externalTrafficPolicy: {{ $instance.service.externalTrafficPolicy }}
   ports:
     - name: server-port
-      port: {{ $.Values.valheimDedicatedServer.port }}
+      port: {{ $.Values.windroseDedicatedServer.port }}
       targetPort: server-port
       protocol: UDP
     - name: query-port
-      port: {{ add $.Values.valheimDedicatedServer.port 1 }}
+      port: {{ add $.Values.windroseDedicatedServer.port 1 }}
       targetPort: query-port
       protocol: UDP
   selector:
-    statefulset.kubernetes.io/pod-name: {{ include "valheim.fullname" $ }}-{{ $i }}
+    statefulset.kubernetes.io/pod-name: {{ include "windrose.fullname" $ }}-{{ $i }}
 ---
 {{- end }}

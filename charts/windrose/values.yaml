@@ -4,7 +4,7 @@
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: "pfeiffermax/valheim-dedicated-server"
+  repository: "pfeiffermax/windrose-dedicated-server"
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
@@ -65,7 +65,7 @@ tolerations: []
 
 affinity: {}
 
-# Valheim dedicated server startup is slow, so you might need to bump up periodSeconds and failureThreshold
+# Windrose dedicated server startup is slow, so you might need to bump up periodSeconds and failureThreshold
 # if you see the startup probe failing.
 startupProbe:
   initialDelaySeconds: 0
@@ -81,15 +81,15 @@ livenessProbe:
   failureThreshold: 3
   successThreshold: 1
 
-valheimDedicatedServer:
-  # Port which you want the server to communicate with. Valheim uses the specified Port AND specified Port+1.
+windroseDedicatedServer:
+  # Port which you want the server to communicate with. Windrose uses the specified Port AND specified Port+1.
   # Default Ports are 2456-2457.
   port: 2456
   # Size of the volume the server uses for its saves directory.
   volumeStorageSize: "1Gi"
   # Name of the existing secret to use for the server password.
-  # If this is set, valheimDedicatedServer.password will be ignored.
-  # The existing secret needs to have stored Valheim server password under the key password.
+  # If this is set, windroseDedicatedServer.password will be ignored.
+  # The existing secret needs to have stored Windrose server password under the key password.
   existingSecret: ""
 
 # You can choose to run multiple instances of Rust dedicated servers here.
@@ -97,7 +97,7 @@ valheimDedicatedServer:
 instances:
     # Name of your server that will be visible in the Server list.
     # You can use just one single string without any spaces as this is specified as command line option.
-  - name: "ValheimServer"
+  - name: "WindroseServer"
     # A World with the name entered will be created. You may also choose an already existing World by entering its name.
     world: "NewWorld"
     # Server password

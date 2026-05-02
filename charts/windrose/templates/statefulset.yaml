@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "valheim.fullname" . }}
+  name: {{ include "windrose.fullname" . }}
   labels:
-    {{- include "valheim.labels" . | nindent 4 }}
+    {{- include "windrose.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ include "valheim.fullname" . }}
+  serviceName: {{ include "windrose.fullname" . }}
   replicas: {{ len .Values.instances }}
   selector:
     matchLabels:
-      {{- include "valheim.selectorLabels" . | nindent 6 }}
+      {{- include "windrose.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -17,7 +17,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "valheim.labels" . | nindent 8 }}
+        {{- include "windrose.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -42,7 +42,7 @@ spec:
             - "-password"
             - "$password"
             - "-port"
-            - "{{ .Values.valheimDedicatedServer.port }}"
+            - "{{ .Values.windroseDedicatedServer.port }}"
             - "-public"
             - "$public"
             - "-saveinterval"
@@ -54,7 +54,7 @@ spec:
             - "-backuplong"
             - "$backupLong"
             - "-savedir"
-            - "/srv/valheim/saves"
+            - "/srv/windrose/saves"
             - "instanceid"
             - "$(POD_NAME)"
             - "$crossPlay"
@@ -64,15 +64,15 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: CONFIG_FILE_PATH
-              value: "/srv/valheim/config/$(POD_NAME)"
+              value: "/srv/windrose/config/$(POD_NAME)"
             - name: SECRET_FILE_PATH
-              value: "/srv/valheim/secret/$(POD_NAME)"
+              value: "/srv/windrose/secret/$(POD_NAME)"
           ports:
             - name: server-port
-              containerPort: {{ .Values.valheimDedicatedServer.port }}
+              containerPort: {{ .Values.windroseDedicatedServer.port }}
               protocol: UDP
             - name: query-port
-              containerPort: {{ add .Values.valheimDedicatedServer.port 1 }}
+              containerPort: {{ add .Values.windroseDedicatedServer.port 1 }}
               protocol: UDP
           startupProbe:
             initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
@@ -85,7 +85,7 @@ spec:
                 - "nc"
                 - "-nuzv"
                 - "127.0.0.1"
-                - "{{ .Values.valheimDedicatedServer.port }}"
+                - "{{ .Values.windroseDedicatedServer.port }}"
           livenessProbe:
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
@@ -97,16 +97,16 @@ spec:
                 - "nc"
                 - "-nuzv"
                 - "127.0.0.1"
-                - "{{ .Values.valheimDedicatedServer.port }}"
+                - "{{ .Values.windroseDedicatedServer.port }}"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: saves-directory
-              mountPath: "/srv/valheim/saves"
+              mountPath: "/srv/windrose/saves"
             - name: config
-              mountPath: "/srv/valheim/config"
+              mountPath: "/srv/windrose/config"
             - name: secret
-              mountPath: "/srv/valheim/secret"
+              mountPath: "/srv/windrose/secret"
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -122,10 +122,10 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ include "valheim.fullname" $ }}
+            name: {{ include "windrose.fullname" $ }}
         - name: secret
           secret:
-            secretName: {{ include "valheim.fullname" $ }}
+            secretName: {{ include "windrose.fullname" $ }}
   volumeClaimTemplates:
   - metadata:
       name: saves-directory
@@ -134,4 +134,4 @@ spec:
         - "ReadWriteOnce"
       resources:
         requests:
-          storage: {{ .Values.valheimDedicatedServer.volumeStorageSize }}
+          storage: {{ .Values.windroseDedicatedServer.volumeStorageSize }}
