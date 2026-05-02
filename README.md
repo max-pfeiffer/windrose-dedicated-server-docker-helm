@@ -19,6 +19,7 @@ manually run any server updates and mess around with your Docker image. It's tha
 Have a look at the [docker compose example](examples/docker-compose/compose.yaml) and
 [its documentation](examples/docker-compose#automated-server-updates).
 There you can see how a server update can be automated with a simple script.
+Also check out [my guide for setting up a Windrose dedicated server with Docker and Docker Compose](https://max-pfeiffer.github.io/a-guide-for-setting-up-a-windrose-dedicated-server-using-docker-and-docker-compose.html). 
 
 **Docker Hub:** https://hub.docker.com/r/pfeiffermax/windrose-dedicated-server
 

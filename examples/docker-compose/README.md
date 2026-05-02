@@ -3,6 +3,8 @@ This example contains a simple docker compose file for running the Windrose serv
 
 It demonstrates the usage of a [Docker Volume](https://docs.docker.com/storage/volumes/) to persist the Windrose server data.
 
+Also check out [my guide for setting up a Windrose dedicated server with Docker and Docker Compose](https://max-pfeiffer.github.io/a-guide-for-setting-up-a-windrose-dedicated-server-using-docker-and-docker-compose.html).
+
 ## Usage
 Clone the repo and start the Windrose server:
 ```shell
