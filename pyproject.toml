@@ -1,6 +1,6 @@
 [project]
 name = "windrose-dedicated-server-docker-helm"
-version = "0.1.0"
+version = "1.0.0"
 description = "Windrose dedicated server - Docker image and Helm chart"
 authors = [
     {name = "Max Pfeiffer",email = "max@maxpfeiffer.ch"}
@@ -9,21 +9,24 @@ license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13,<4"
 dependencies = [
-    "click (>=8.3.3,<9.0.0)",
-    "python-on-whales (>=0.81.0,<0.82.0)",
-    "steam[client] (>=1.4.4,<2.0.0)",
+    "click (==8.3.3)",
+    "python-on-whales (==0.81.0)",
+    "steam[client] (==1.4.4)",
 ]
 
 [dependency-groups]
 dev = [
     "bcrypt (==5.0.0)",
     "furl (==2.1.4)",
-    "pre-commit (>=4.6.0,<5.0.0)",
-    "pytest (>=9.0.3,<10.0.0)",
-    "pytest-mock (>=3.15.1,<4.0.0)",
-    "pytest-cov (>=7.1.0,<8.0.0)",
+    "pre-commit (==4.6.0)",
+    "pytest (==9.0.3)",
+    "pytest-mock (==3.15.1)",
+    "pytest-cov (==7.1.0)",
     "testcontainers (==4.14.2)"
 ]
+
+[tool.poetry]
+package-mode = false
 
 [tool.ruff]
 src = ["build", "tests"]
