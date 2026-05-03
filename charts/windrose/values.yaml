@@ -82,9 +82,8 @@ livenessProbe:
   successThreshold: 1
 
 windroseDedicatedServer:
-  # Port which you want the server to communicate with. Windrose uses the specified Port AND specified Port+1.
-  # Default Ports are 2456-2457.
-  port: 2456
+  # Port for the Windrose Services.
+  port: 28050
   # Size of the volume the server uses for its saves directory.
   volumeStorageSize: "1Gi"
   # Name of the existing secret to use for the server password.
