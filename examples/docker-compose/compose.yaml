@@ -15,7 +15,7 @@ services:
         target: "/srv/windrose/R5/Saved"
   windrose-server:
     image: "pfeiffermax/windrose-dedicated-server:latest"
-    pull_policy: never
+    pull_policy: always
     container_name: "windrose-server"
     environment:
       PASSWORD: "supersecret"
