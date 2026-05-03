@@ -4,6 +4,8 @@
 [![Code Quality](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/code-quality.yaml/badge.svg)](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/code-quality.yaml)
 [![Test Image Build](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/test-image-build.yaml/badge.svg)](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/test-image-build.yaml)
 [![Publish Docker Image](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/publish.yaml/badge.svg)](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/publish.yaml)
+[![Lint Helm Chart](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/helm-lint.yaml/badge.svg)](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/helm-lint.yaml)
+[![Release Helm Charts](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/helm-release.yaml/badge.svg)](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/helm-release.yaml)
 ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/pfeiffermax/windrose-dedicated-server?sort=semver)
 ![Docker Pulls](https://img.shields.io/docker/pulls/pfeiffermax/windrose-dedicated-server)
 
