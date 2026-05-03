@@ -1,10 +1,14 @@
 # Windrose Helm Chart
-A [Helm chart](https://helm.sh/) for running a Windrose dedicated server. Since v1.0.0 this Helm chart supports running multiple
+A [Helm chart](https://helm.sh/) for running a Windrose dedicated server. It supports running multiple
 server instances using one StatefulSet. 
+
+This Helm chart is running the server with `USE_DIRECT_CONNECTION=true` and refrains from using ICE protocol to
+establish P2P connection. Doing so would result in dynamic ports being used by the server for exposing connections.
+This is not compatible with Kubernetes networking and also a security hazard.
 
 ## Installation
 If you want to run Windrose on a bare metal Kubernetes cluster, I recommend reading
-[my blog post](https://max-pfeiffer.github.io/blog/hosting-game-servers-on-bare-metal-kubernetes-with-kube-vip.html)
+[my blog post](https://max-pfeiffer.github.io/hosting-game-servers-on-bare-metal-kubernetes-with-cilium-as-cni.html)
 about that topic.
 
 ### Helm
@@ -49,16 +53,16 @@ securityContext:
 If that doesn't suit your needs, just override these defaults.
 
 ### Resources
-Make sure to get the resource specs right. You will need at least two CPU cores and 2GB of RAM.
-[Using 4GB of RAM is recommended](https://windrose.fandom.com/wiki/Dedicated_servers#Requirements):
+Make sure to get the resource specs right. You will need at least two CPU cores and 8GB of RAM.
+[Using 2 cores and 12GB of RAM is recommended for 4 players](https://playwindrose.com/dedicated-server-guide/):
 ```yaml
 resources:
   limits:
     cpu: 3
-    memory: 5Gi
+    memory: 14Gi
   requests:
     cpu: 2
-    memory: 4Gi
+    memory: 12Gi
 ```
 Especially RAM is quite critical as Kubernetes is evicting/kills the Pod when it overshoots that resource limit. So
 you want to check your monitoring and adjust `resource.limits.memory` when you see that happening. It's generally a
@@ -78,37 +82,27 @@ startupProbe:
 Tweak the Windrose server config to your liking. You can add a list of server to `instances`. Please be aware that the
 configuration of resources and ports are shared by these instances.
 ```yaml
-# You can choose to run multiple instances of Rust dedicated servers here.
+# You can choose to run multiple instances of Windrose dedicated servers here.
 # For a new instance add another entry to this list.
 instances:
-    # Name of your server that will be visible in the Server list.
-    # You can use just one single string without any spaces as this is specified as command line option.
+    # Name of your server. Helpful if invite codes look similar
   - name: "WindroseServer"
-    # A World with the name entered will be created. You may also choose an already existing World by entering its name.
-    world: "NewWorld"
     # Server password
-    # ATTENTION: needs to be at least 5 characters long, otherwise the server startup fails!
     password: "supersecret"
-    # Set the visibility of your server. 1 is default and will make the server visible in the browser.
-    # Set it to 0 to make the server invisible and only joinable via the ‘Join IP’-button.
-    public: "1"
-    # Runs the Server on the Crossplay backend (PlayFab), which lets users from any platform join.
-    # If you set it to false, the Steam backend is used, which means only Steam users can see and join the Server.
-    crossPlay: false
-    # How often the world will save in seconds.
-    saveInterval: "1800"
-    # Sets how many automatic backups will be kept. The first is the ‘short’ backup length,
-    # and the rest are the ‘long’ backup length.
-    # By default, that means one backup that is 2 hours old, and 3 backups that are 12 hours apart.
-    backups: "4"
-    # Sets the interval between the first automatic backups.
-    backupShort: "7200"
-    # Sets the interval between the subsequent automatic backups.
-    backupLong: "43200"
-    # Pod specific service
+    # Invite code to find your server. 0-9, a-z and A-Z symbols are allowed. Should contain at least 6 symbols.
+    # Case sensitive.
+    inviteCode: ""
+    # Maximum number of simultaneous players on your server.
+    maxPlayerCount: "5"
+    # Specifies the region for the Connection Service. Supported options: SEA, CIS, EU (EU covers both EU & NA).
+    # If left empty, the server will automatically detect and select the optimal region based on latency. If desired
+    # region is specified (for example, EU), the server will use that region exclusively.
+    userSelectedRegion: ""
+    # Service configuration for this instance
     service:
       type: LoadBalancer
       externalTrafficPolicy: Cluster
       metadata:
+        labels: {}
         annotations: {}
 ```

@@ -91,7 +91,7 @@ windroseDedicatedServer:
   # The existing secret needs to have stored Windrose server password under the key password.
   existingSecret: ""
 
-# You can choose to run multiple instances of Rust dedicated servers here.
+# You can choose to run multiple instances of Windrose dedicated servers here.
 # For a new instance add another entry to this list.
 instances:
     # Name of your server. Helpful if invite codes look similar
