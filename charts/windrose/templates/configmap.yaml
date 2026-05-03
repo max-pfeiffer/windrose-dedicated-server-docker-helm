@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "windrose.fullname" . }}
+  labels:
+    {{- include "windrose.labels" . | nindent 4 }}
+data:
+  {{- range $i, $instance := .Values.instances }}
+  {{ include "windrose.fullname" $ }}-{{ $i }}: |
+  {{- range $key, $value := $instance }}
+  {{- if not (has $key (list "password" "service")) }}
+    {{- if eq $key "crossPlay" }}
+    {{- if $value }}
+    {{ $key }}=-crossplay
+    {{- else }}
+    {{ $key }}=
+    {{- end }}
+    {{- else }}
+    {{ $key }}={{ $value }}
+    {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- end }}

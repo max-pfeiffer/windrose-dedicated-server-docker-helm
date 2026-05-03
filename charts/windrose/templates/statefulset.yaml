@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "windrose.fullname" . }}
+  labels:
+    {{- include "windrose.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "windrose.fullname" . }}
+  replicas: {{ len .Values.instances }}
+  selector:
+    matchLabels:
+      {{- include "windrose.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "windrose.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: CONFIG_FILE_PATH
+              value: "/srv/windrose/config/$(POD_NAME)"
+            - name: SECRET_FILE_PATH
+              value: "/srv/windrose/secret/$(POD_NAME)"
+          ports:
+            - name: server-port-tcp
+              containerPort: {{ .Values.windroseDedicatedServer.port }}
+              protocol: UDP
+            - name: server-port-udp
+              containerPort: {{ .Values.windroseDedicatedServer.port }}
+              protocol: UDP
+          startupProbe:
+            initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            successThreshold: {{ .Values.startupProbe.successThreshold }}
+            exec:
+              command:
+                - "nc"
+                - "-nuzv"
+                - "127.0.0.1"
+                - "{{ .Values.windroseDedicatedServer.port }}"
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            exec:
+              command:
+                - "nc"
+                - "-nuzv"
+                - "127.0.0.1"
+                - "{{ .Values.windroseDedicatedServer.port }}"
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: saves-directory
+              mountPath: "/srv/windrose/R5/Saved"
+            - name: config
+              mountPath: "/srv/windrose/config"
+            - name: secret
+              mountPath: "/srv/windrose/secret"
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "windrose.fullname" $ }}
+        - name: secret
+          secret:
+            secretName: {{ include "windrose.fullname" $ }}
+  volumeClaimTemplates:
+  - metadata:
+      name: saves-directory
+    spec:
+      accessModes:
+        - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: {{ .Values.windroseDedicatedServer.volumeStorageSize }}
