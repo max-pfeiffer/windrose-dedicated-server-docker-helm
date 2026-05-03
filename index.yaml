@@ -3,6 +3,16 @@ entries:
   windrose:
   - apiVersion: v2
     appVersion: latest
+    created: "2026-05-03T13:47:05.269467934Z"
+    description: A Helm chart for running a Windrose dedicated server on Kubernetes
+    digest: 4f162200504337e8c6eb17a82c3c78e305ddcc7e3c45c6b37b55e08dbc5263e8
+    name: windrose
+    type: application
+    urls:
+    - https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/releases/download/windrose-1.2.0/windrose-1.2.0.tgz
+    version: 1.2.0
+  - apiVersion: v2
+    appVersion: latest
     created: "2026-05-03T12:12:16.057824026Z"
     description: A Helm chart for running a Windrose dedicated server on Kubernetes
     digest: d375b90b0b46d8135b66c6f80528ac9705738139f1be90cd64f6e66d5432b9ac
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/releases/download/windrose-1.1.1/windrose-1.1.1.tgz
     version: 1.1.1
-generated: "2026-05-03T12:12:16.057829676Z"
+generated: "2026-05-03T13:47:05.269481415Z"
