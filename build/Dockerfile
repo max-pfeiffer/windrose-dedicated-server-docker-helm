@@ -14,7 +14,7 @@ RUN wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz 
 RUN ./steamcmd.sh +login anonymous +quit
 RUN ./steamcmd.sh +@sSteamCmdForcePlatformType windows +force_install_dir /srv/windrose +login anonymous +app_update 4129620 validate +quit
 
-FROM debian:trixie-slim AS production-image
+FROM pfeiffermax/debian-wine:latest AS production-image
 
 # Principle of least privilege: create a new user for running the application
 RUN groupadd -g 10001 windrose && \
@@ -22,28 +22,12 @@ RUN groupadd -g 10001 windrose && \
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
-    ca-certificates \
-    gnupg \
-    wget \
     python3 \
-    xvfb \
-    xauth \
     winbind \
-    vim \
+    netcat-traditional \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install keyrings
-RUN mkdir -pm755 /etc/apt/keyrings \
-    && wget -O - https://dl.winehq.org/wine-builds/winehq.key | gpg --dearmor -o /etc/apt/keyrings/winehq-archive.key -
-
-# Add sources file
-RUN dpkg --add-architecture i386 \
-    && wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/debian/dists/trixie/winehq-trixie.sources
-
-# Install Wine
-RUN apt-get update \
-    && apt-get install --install-recommends -y winehq-stable
 
 WORKDIR /srv/windrose
 
@@ -66,6 +50,8 @@ RUN Xvfb :0 -screen 0 1024x768x16 & \
     sleep 2 && \
     su -l windrose -c "WINEPREFIX=/home/steam/.wine WINEARCH=win64 WINEDLLOVERRIDES='mscoree,mshtml=' winecfg -v win10 >/dev/null 2>&1; wineboot --init >/dev/null 2>&1" && \
     kill %1 2>/dev/null; true
+
+EXPOSE 28050/tcp 28050/udp
 
 # Use the unpriviledged user to run the application
 USER 10001
