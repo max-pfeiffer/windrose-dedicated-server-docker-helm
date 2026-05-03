@@ -57,6 +57,16 @@ docker run -it --publish 28050:28050/tcp --publish 28050:28050/udp --env SERVER_
 ### Docker Compose
 Please have a look at the [docker compose example](examples/docker-compose/README.md).
 
+## Helm chart
+If you would like to run the Windrose server in your [Kubernetes](https://kubernetes.io/) cluster, I provide a
+[Helm chart](https://helm.sh/) you could use: [https://max-pfeiffer.github.io/windrose-dedicated-server-docker-helm](https://max-pfeiffer.github.io/windrose-dedicated-server-docker-helm)
+
+There is also [documentation available](charts/windrose/README.md) for that Helm chart.
+
+If you want to run your Windrose server on bare metal Kubernetes, check out
+[my blog article](https://max-pfeiffer.github.io/hosting-game-servers-on-bare-metal-kubernetes-with-cilium-as-cni.html)
+on how to do that using [Cilium](https://cilium.io/).
+
 ## Additional Information Sources
 * [SteamDB](https://steamdb.info/app/4129620/info/)
 * [Official Windrose Dedicated Server Guide](https://playwindrose.com/dedicated-server-guide)
