@@ -130,7 +130,9 @@ def test_update_server_description(
     """
     mocked_args = MagicMock()
     mocked_args.server_description = str(server_description_path)
-    mocker.patch("build.update_server_description.parse_args", return_value=mocked_args)
+    mocker.patch(
+        "build.scripts.update_server_description.parse_args", return_value=mocked_args
+    )
 
     with monkeypatch.context() as mp:
         mp.setenv("INVITE_CODE", fake_invite_code)
