@@ -7,17 +7,11 @@ metadata:
 data:
   {{- range $i, $instance := .Values.instances }}
   {{ include "windrose.fullname" $ }}-{{ $i }}: |
-  {{- range $key, $value := $instance }}
-  {{- if not (has $key (list "password" "service")) }}
-    {{- if eq $key "crossPlay" }}
-    {{- if $value }}
-    {{ $key }}=-crossplay
-    {{- else }}
-    {{ $key }}=
-    {{- end }}
-    {{- else }}
-    {{ $key }}={{ $value }}
-    {{- end }}
-    {{- end }}
-  {{- end }}
+    SERVER_NAME={{ $instance.name }}
+    INVITE_CODE={{ $instance.inviteCode }}
+    MAX_PLAYER_COUNT={{ $instance.maxPlayerCount }}
+    USER_SELECTED_REGION={{ $instance.userSelectedRegion }}
+    USE_DIRECT_CONNECTION=true
+    DIRECT_CONNECTION_SERVER_PORT={{ $.Values.windroseDedicatedServer.port }}
+    DIRECT_CONNECTION_PROXY_ADDRESS=0.0.0.0
   {{- end }}

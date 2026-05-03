@@ -107,18 +107,6 @@ instances:
     # If left empty, the server will automatically detect and select the optimal region based on latency. If desired
     # region is specified (for example, EU), the server will use that region exclusively.
     userSelectedRegion: ""
-    # IP Address for listening sockets.
-    p2pProxyAddress: ""
-    # If true, the server will create sockets for direct connection with clients. If false, the server will use ICE
-    # protocol to establish P2P connection.
-    useDirectConnection: "true"
-    # Address for direct connection. For future purposes. Not used now.
-    directConnectionServerAddress: ""
-    # Port for direct connection. Should be available for TCP and UDP connection if UseDirectConnection is true.
-    directConnectionServerPort: "28050"
-    # Can be used to choose specified network on computer where server with direct connection is running.
-    # 0.0.0.0 should be used by default.
-    directConnectionProxyAddress: "0.0.0.0"
     # Service configuration for this instance
     service:
       type: LoadBalancer
