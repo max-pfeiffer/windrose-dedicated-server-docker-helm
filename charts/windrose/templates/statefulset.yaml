@@ -35,6 +35,10 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: CONFIG_FILE_PATH
               value: "/srv/windrose/config/$(POD_NAME)"
             - name: SECRET_FILE_PATH
@@ -42,7 +46,7 @@ spec:
           ports:
             - name: server-port-tcp
               containerPort: {{ .Values.windroseDedicatedServer.port }}
-              protocol: UDP
+              protocol: TCP
             - name: server-port-udp
               containerPort: {{ .Values.windroseDedicatedServer.port }}
               protocol: UDP
