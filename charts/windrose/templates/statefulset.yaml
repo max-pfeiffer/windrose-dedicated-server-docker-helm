@@ -101,7 +101,7 @@ spec:
             name: {{ include "windrose.fullname" $ }}
         - name: secret
           secret:
-            secretName: {{ include "windrose.fullname" $ }}
+            secretName: {{ .Values.windroseDedicatedServer.existingSecret | default (include "windrose.fullname" $) }}
   volumeClaimTemplates:
   - metadata:
       name: saves-directory
