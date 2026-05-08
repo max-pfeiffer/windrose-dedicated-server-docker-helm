@@ -106,3 +106,13 @@ instances:
         labels: {}
         annotations: {}
 ```
+
+## Transfer Your World to the Dedicated Server
+Like us, you probably noticed after a while playing that game that it's not working for you without a dedicated server.
+So someone was hosting the game on his own machine and all of you joined. So you need to transfer that world save to the
+dedicated server. 
+[This process is described well in the official dedicated server guide](https://playwindrose.com/dedicated-server-guide/#wsg-faq-transfer).
+Doing that for a server running on Kubernetes is rather straight forward:
+```shell
+kubectl cp /tmp/windrose_saves_export/RocksDB/0.10.0/Worlds/10D004BB976E47F88EAC350D3C52A15C applications/windrose-dedicated-server-0:/srv/windrose/R5/Saved/SaveProfiles/Default/RocksDB/0.10.0/Worlds -c windrose
+```
