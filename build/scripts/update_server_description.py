@@ -37,6 +37,7 @@ def main() -> None:
     with open(server_description_file_path) as server_description_file:
         server_description = json.load(server_description_file)
 
+    world_island_id: str | None = getenv("WORLD_ISLAND_ID")
     invite_code: str | None = getenv("INVITE_CODE")
     password: str = getenv("PASSWORD", "")
     server_name: str | None = getenv("SERVER_NAME")
@@ -59,6 +60,11 @@ def main() -> None:
     direct_connection_proxy_address: str | None = getenv(
         "DIRECT_CONNECTION_PROXY_ADDRESS"
     )
+
+    if world_island_id is not None:
+        server_description["ServerDescription_Persistent"]["WorldIslandId"] = (
+            world_island_id
+        )
 
     if invite_code is not None:
         server_description["ServerDescription_Persistent"]["InviteCode"] = invite_code
