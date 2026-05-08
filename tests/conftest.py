@@ -12,7 +12,7 @@ from python_on_whales import DockerClient
 from testcontainers.registry import DockerRegistryContainer
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def server_description_path() -> Generator[Path, Any]:
     """Return a temporary path to a ServerDescription.json file.
 

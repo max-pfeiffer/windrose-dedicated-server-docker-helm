@@ -30,6 +30,7 @@ Also check out [my guide for setting up a Windrose dedicated server with Docker 
 ## Usage
 ### Configuration
 You can configure the Windrose server with the following environment variables:
+* `WORLD_ISLAND_ID`- ID of currently selected world. It should be the same as a similar field in one of WorldDescription.json file of the server. This world will be loaded on start of the server.
 * `INVITE_CODE`- invite code to find your server. 0-9, a-z and A-Z symbols are allowed. Should contain at least 6 symbols. Case sensitive.
 * `PASSWORD` - this is the password.
 * `SERVER_NAME` - name of your server. Helpful if invite codes look similar
