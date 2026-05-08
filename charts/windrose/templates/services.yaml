@@ -50,6 +50,6 @@ spec:
       targetPort: server-port-udp
       protocol: UDP
   selector:
-    statefulset.kubernetes.io/pod-name: {{ include "windrose.fullname" $ }}-{{ $i }}
+    {{- include "windrose.instanceSelectorLabels" (dict "root" $ "index" $i) | nindent 4 }}
 ---
 {{- end }}

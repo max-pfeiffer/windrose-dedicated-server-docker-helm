@@ -49,3 +49,14 @@ Selector labels
 app.kubernetes.io/name: {{ include "windrose.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Per-instance selector labels.
+Expects a dict with `root` (the chart context) and `index` (instance ordinal).
+Used to give each per-instance StatefulSet a unique pod selector so that
+multiple StatefulSets in the same release do not claim each other's pods.
+*/}}
+{{- define "windrose.instanceSelectorLabels" -}}
+{{- include "windrose.selectorLabels" .root }}
+app.kubernetes.io/component: {{ include "windrose.fullname" .root }}-{{ .index }}
+{{- end }}

@@ -32,7 +32,6 @@ podSecurityContext:
   seccompProfile:
     type: RuntimeDefault
 
-
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
@@ -86,18 +85,27 @@ windroseDedicatedServer:
   port: 28050
   # Size of the volume the server uses for its saves directory.
   volumeStorageSize: "1Gi"
-  # Name of the existing secret to use for the server password.
-  # If this is set, windroseDedicatedServer.password will be ignored.
-  # The existing secret needs to have stored Windrose server password under the key password.
-  existingSecret: ""
 
 # You can choose to run multiple instances of Windrose dedicated servers here.
 # For a new instance add another entry to this list.
 instances:
-    # Name of your server. Helpful if invite codes look similar
+  # Name of your server. Helpful if invite codes look similar
   - name: "WindroseServer"
-    # Server password
+    # Server password. Used to populate the chart-generated Secret for this instance
+    # (under the key PASSWORD). Ignored when `existingSecret` is set.
     password: "supersecret"
+    # Name of an existing Kubernetes Secret holding the server password for this instance.
+    # If set, the chart will NOT generate a Secret for this instance and `password` is ignored.
+    # The referenced Secret MUST contain a single key named `PASSWORD` whose value is the password.
+    # Example:
+    #   apiVersion: v1
+    #   kind: Secret
+    #   metadata:
+    #     name: my-windrose-0-secret
+    #   type: Opaque
+    #   stringData:
+    #     PASSWORD: "supersecret"
+    existingSecret: ""
     # Invite code to find your server. 0-9, a-z and A-Z symbols are allowed. Should contain at least 6 symbols.
     # Case sensitive.
     inviteCode: ""

@@ -1,6 +1,7 @@
 # Windrose Helm Chart
 A [Helm chart](https://helm.sh/) for running a Windrose dedicated server. It supports running multiple
-server instances using one StatefulSet. 
+server instances; each entry in `instances` produces its own StatefulSet (with one replica), its own per-instance
+Service and its own per-instance Secret holding the server password.
 
 This Helm chart is running the server with `USE_DIRECT_CONNECTION=true` and refrains from using ICE protocol to
 establish P2P connection. Doing so would result in dynamic ports being used by the server for exposing connections.
@@ -12,10 +13,9 @@ If you want to run Windrose on a bare metal Kubernetes cluster, I recommend read
 about that topic.
 
 ### Helm
-You can run multiple server instance with each Helm installation. Please be aware that with a StatefulSet Kubernetes
-starts additional instances only after the first instance is in ready state. And Windrose server startup is slow,
-so it might take a while until your Windrose server fleet is up and running completely.
-It might better suit your needs to install multiple StatefulSets with separate Helm releases.
+You can run multiple server instances with each Helm installation. Each instance gets its own StatefulSet (with a
+single replica), so they start independently and in parallel rather than serially. Windrose server startup is slow,
+so it might still take a while until your Windrose server fleet is up and running completely.
 
 The installation is done as follows:
 ```shell
@@ -79,16 +79,20 @@ startupProbe:
 ```
 
 ### Windrose server config
-Tweak the Windrose server config to your liking. You can add a list of server to `instances`. Please be aware that the
-configuration of resources and ports are shared by these instances.
+Tweak the Windrose server config to your liking. You can add a list of servers to `instances`. Please be aware that
+the configuration of resources and ports are shared by these instances.
 ```yaml
 # You can choose to run multiple instances of Windrose dedicated servers here.
 # For a new instance add another entry to this list.
 instances:
-    # Name of your server. Helpful if invite codes look similar
+  # Name of your server. Helpful if invite codes look similar
   - name: "WindroseServer"
-    # Server password
+    # Server password. Used to populate the chart-generated Secret for this instance
+    # (under the key PASSWORD). Ignored when `existingSecret` is set.
     password: "supersecret"
+    # Optional: name of an existing Secret with a single key `PASSWORD` whose value is the
+    # password for this instance. When set, the chart skips generating a Secret for it.
+    existingSecret: ""
     # Invite code to find your server. 0-9, a-z and A-Z symbols are allowed. Should contain at least 6 symbols.
     # Case sensitive.
     inviteCode: ""
@@ -105,6 +109,30 @@ instances:
       metadata:
         labels: {}
         annotations: {}
+```
+
+### Server password (Secret)
+The password for each instance is delivered to the container as the environment variable `PASSWORD` via
+`envFrom: secretRef`. By default the chart generates one Secret per instance, named `<release-fullname>-<index>`,
+containing a single key `PASSWORD`.
+
+If you'd rather manage the Secret yourself (e.g. via Sealed Secrets, External Secrets, SOPS, etc.), set
+`existingSecret` on the relevant instance entry. The referenced Secret **must** contain a single key named `PASSWORD`:
+
+```yaml
+instances:
+  - name: "WindroseServer"
+    existingSecret: "my-windrose-0-secret"   # must contain key: PASSWORD
+```
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-windrose-0-secret
+type: Opaque
+stringData:
+  PASSWORD: "supersecret"
 ```
 
 ## Transfer Your World to the Dedicated Server

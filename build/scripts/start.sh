@@ -5,23 +5,15 @@ SERVER_DESCRIPTION=/srv/windrose/R5/ServerDescription.json
 SERVER_LOGFILE=/srv/windrose/R5/Saved/Logs/R5.log
 COUNTER=0
 
-# When this image is run using the Helm chart, the Helm chart creates files containing environment variables
-# with server configuration and the password. These environment variables are exported to the current shell
-# if those files exist.
+# When this image is run using the Helm chart, the Helm chart creates a file containing environment variables
+# with server configuration. These environment variables are exported to the current shell if that file exists.
+# The PASSWORD (and any other future secret fields) is provided directly via the container environment using
+# `envFrom: secretRef`, so no secret file is sourced here.
 if [[ -n "${CONFIG_FILE_PATH}" ]]; then
   if [[ -f "${CONFIG_FILE_PATH}" ]]; then
     set -a; source "${CONFIG_FILE_PATH}"; set +a
   else
-    echo "SECRET_FILE_PATH is set, but file with environment variables at ${CONFIG_FILE_PATH} does not exit"
-    exit 1
-  fi
-fi
-
-if [[ -n "${SECRET_FILE_PATH}" ]]; then
-  if [[ -f "${SECRET_FILE_PATH}" ]]; then
-    set -a; source "${SECRET_FILE_PATH}"; set +a
-  else
-    echo "SECRET_FILE_PATH is set, but file with environment variables at ${SECRET_FILE_PATH} does not exit"
+    echo "CONFIG_FILE_PATH is set, but file with environment variables at ${CONFIG_FILE_PATH} does not exist"
     exit 1
   fi
 fi
