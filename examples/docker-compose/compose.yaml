@@ -1,4 +1,4 @@
-name: valheim
+name: windrose
 
 services:
   init-container:

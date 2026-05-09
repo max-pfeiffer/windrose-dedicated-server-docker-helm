@@ -19,6 +19,35 @@ def parse_args(args: list[str]):
     return parsed_args
 
 
+def get_game_version(server_description: dict) -> str:
+    """Extract game version from ServerDescription.json file.
+
+    :param server_description:
+    :return:
+    """
+    deployment_id = server_description["DeploymentId"]
+    parts = deployment_id.split(".")
+    version = ".".join(parts[:3])
+    return version
+
+
+def get_current_worlds(game_version: str) -> list[str]:
+    """Aquire all world directories from file system.
+
+    :param game_version:
+    :return:
+    """
+    dir_names = []
+    worlds_path = (
+        Path("/srv/windrose/R5/Saved/SaveProfiles/Default/RocksDB_v2")
+        / game_version
+        / "Worlds"
+    )
+    if worlds_path.exists():
+        dir_names = [p.name for p in worlds_path.iterdir() if p.is_dir()]
+    return dir_names
+
+
 def main() -> None:
     """Execute main functionality.
 
@@ -37,7 +66,8 @@ def main() -> None:
     with open(server_description_file_path) as server_description_file:
         server_description = json.load(server_description_file)
 
-    world_island_id: str | None = getenv("WORLD_ISLAND_ID")
+    current_worlds = get_current_worlds(get_game_version(server_description))
+
     invite_code: str | None = getenv("INVITE_CODE")
     password: str = getenv("PASSWORD", "")
     server_name: str | None = getenv("SERVER_NAME")
@@ -61,10 +91,15 @@ def main() -> None:
         "DIRECT_CONNECTION_PROXY_ADDRESS"
     )
 
-    if world_island_id is not None:
+    if len(current_worlds) == 0:
+        print("Windrose Server is generating a new world ID")
+    elif len(current_worlds) == 1:
         server_description["ServerDescription_Persistent"]["WorldIslandId"] = (
-            world_island_id
+            current_worlds[0]
         )
+    else:
+        print("Multiple worlds found, cannot determine the correct world")
+        exit(1)
 
     if invite_code is not None:
         server_description["ServerDescription_Persistent"]["InviteCode"] = invite_code

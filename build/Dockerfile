@@ -39,6 +39,8 @@ COPY --chown=windrose:windrose scripts/start.sh /srv/windrose/start.sh
 
 COPY --chown=windrose:windrose scripts/update_server_description.py /srv/windrose/update_server_description.py
 
+COPY --chown=windrose:windrose scripts/ServerDescription.json /srv/windrose/R5/ServerDescription.json
+
 RUN chmod +x /srv/windrose/start.sh
 
 ENV WINEPREFIX=/home/windrose/.wine \
