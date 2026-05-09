@@ -24,7 +24,7 @@ def test_argument_parser(server_description_path: Path):
     "fake_invite_code,fake_password,fake_server_name,fake_max_player_count,"
     "fake_user_selected_region,fake_p2p_proxy_address,fake_use_direct_connection,"
     "fake_direct_connection_server_address,fake_direct_connection_server_port,"
-    "fake_direct_connection_proxy_address,fake_world_island_id,expected_result",
+    "fake_direct_connection_proxy_address,expected_result",
     [
         (
             "fake_invite_code",
@@ -37,7 +37,6 @@ def test_argument_parser(server_description_path: Path):
             "fake_direct_connection_server_address",
             "28050",
             "fake_direct_connection_proxy_address",
-            "10D004BB976E47F88EAC350D3C52A15C",
             {
                 "Version": 1,
                 "DeploymentId": "0.10.0.3.104-256f9653",
@@ -47,7 +46,7 @@ def test_argument_parser(server_description_path: Path):
                     "IsPasswordProtected": True,
                     "Password": "fake_password",
                     "ServerName": "fake_server_name",
-                    "WorldIslandId": "10D004BB976E47F88EAC350D3C52A15C",
+                    "WorldIslandId": "1EDB437B925C493C86998DADB3D5CA90",
                     "MaxPlayerCount": 5,
                     "UserSelectedRegion": "fake_user_selected_region",
                     "P2pProxyAddress": "fake_p2p_proxy_address",
@@ -71,7 +70,6 @@ def test_argument_parser(server_description_path: Path):
             "fake_direct_connection_server_address",
             "28050",
             "fake_direct_connection_proxy_address",
-            "10D004BB976E47F88EAC350D3C52A15C",
             {
                 "Version": 1,
                 "DeploymentId": "0.10.0.3.104-256f9653",
@@ -81,7 +79,7 @@ def test_argument_parser(server_description_path: Path):
                     "IsPasswordProtected": False,
                     "Password": "",
                     "ServerName": "fake_server_name",
-                    "WorldIslandId": "10D004BB976E47F88EAC350D3C52A15C",
+                    "WorldIslandId": "1EDB437B925C493C86998DADB3D5CA90",
                     "MaxPlayerCount": 5,
                     "UserSelectedRegion": "fake_user_selected_region",
                     "P2pProxyAddress": "fake_p2p_proxy_address",
@@ -95,7 +93,6 @@ def test_argument_parser(server_description_path: Path):
             },
         ),
         (
-            None,
             None,
             None,
             None,
@@ -142,7 +139,6 @@ def test_update_server_description(
     fake_direct_connection_server_address: str | None,
     fake_direct_connection_server_port: str | None,
     fake_direct_connection_proxy_address: str | None,
-    fake_world_island_id: str | None,
     expected_result: dict,
 ) -> None:
     """Test updating server description.
@@ -160,7 +156,6 @@ def test_update_server_description(
     :param fake_direct_connection_server_address:
     :param fake_direct_connection_server_port:
     :param fake_direct_connection_proxy_address:
-    :param fake_world_island_id:
     :param expected_result:
     :return:
     """
@@ -198,8 +193,6 @@ def test_update_server_description(
             mp.setenv(
                 "DIRECT_CONNECTION_PROXY_ADDRESS", fake_direct_connection_proxy_address
             )
-        if fake_world_island_id is not None:
-            mp.setenv("WORLD_ISLAND_ID", fake_world_island_id)
         main()
 
     with open(server_description_path) as server_description_file:
