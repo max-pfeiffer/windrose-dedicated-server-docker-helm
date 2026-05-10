@@ -107,12 +107,52 @@ instances:
         annotations: {}
 ```
 
-## Transfer Your World to the Dedicated Server
-Like us, you probably noticed after a while playing that game that it's not working for you without a dedicated server.
-So someone was hosting the game on his own machine and all of you joined. So you need to transfer that world save to the
-dedicated server. 
-[This process is described well in the official dedicated server guide](https://playwindrose.com/dedicated-server-guide/#wsg-faq-transfer).
-Doing that for a server running on Kubernetes is rather straight forward:
+### Using an existing Secret
+If you are doing GitOps you probably want to use an existing Secret which you source from some secrets provider of
+your choice. You can specify an existing Secret for this Helm chart like so:
+```yaml
+windroseDedicatedServer:
+  existingSecret: "your-secret-name"
+```
+Your Secret's data structure for one instance should look like this eventually:
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: your-secret-name
+type: Opaque
+stringData:
+  your-helm-release-name-0: |
+    PASSWORD=your-password
+```
+If you want to run multiple instances, add additional data entries with a password for your instances i.e.
+`your-helm-release-name-1`, `your-helm-release-name-2` and so on. To be sure about the secret data structure you can 
+render all Kubernetes resources with Helm **without** specifying an existing secret:
 ```shell
-kubectl cp /tmp/windrose_saves_export/RocksDB/0.10.0/Worlds/10D004BB976E47F88EAC350D3C52A15C applications/windrose-dedicated-server-0:/srv/windrose/R5/Saved/SaveProfiles/Default/RocksDB/0.10.0/Worlds -c windrose
+helm template your-helm-release-name windrose/windrose --values your_values.yaml --namespace yournamespace 
+```
+
+If you use the [External Secrets Operator](https://external-secrets.io/) a template comes in handy for doing this:
+```yaml
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: your-secret-name
+  namespace: games
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: onepassword-connect
+  target:
+    creationPolicy: Owner
+    template:
+      engineVersion: v2
+      data:
+        windrose-dedicated-server-0: |
+          PASSWORD={{ .password }}
+  data:
+    - secretKey: password
+      remoteRef:
+        key: windrose-password
+        property: password
 ```
