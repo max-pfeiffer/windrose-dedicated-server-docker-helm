@@ -11,6 +11,7 @@ data:
     INVITE_CODE={{ $instance.inviteCode }}
     MAX_PLAYER_COUNT={{ $instance.maxPlayerCount }}
     USER_SELECTED_REGION={{ $instance.userSelectedRegion }}
+    WORLD_ISLAND_ID={{ $instance.worldIslandId }}
     USE_DIRECT_CONNECTION=true
     DIRECT_CONNECTION_SERVER_PORT={{ $.Values.windroseDedicatedServer.port }}
     DIRECT_CONNECTION_PROXY_ADDRESS=0.0.0.0

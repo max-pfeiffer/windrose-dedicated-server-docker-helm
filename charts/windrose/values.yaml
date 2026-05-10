@@ -107,6 +107,9 @@ instances:
     # If left empty, the server will automatically detect and select the optimal region based on latency. If desired
     # region is specified (for example, EU), the server will use that region exclusively.
     userSelectedRegion: ""
+    # ID of currently selected world. It should be the same as a similar field in one of WorldDescription.json file
+    # of the server. This world will be loaded on start of the server.
+    worldIslandId: ""
     # Service configuration for this instance
     service:
       type: LoadBalancer
