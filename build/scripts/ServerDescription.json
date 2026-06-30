@@ -3,7 +3,7 @@
         "DeploymentId": "0.10.0.3.104-256f9653",
         "ServerDescription_Persistent":
         {
-                "PersistentServerId": "9BE66DD44655244015C1B3AC3CE4515A",
+                "PersistentServerId": "",
                 "InviteCode": "d2be7c90",
                 "IsPasswordProtected": false,
                 "Password": "",

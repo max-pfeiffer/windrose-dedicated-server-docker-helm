@@ -1,13 +1,53 @@
 """Tests for Updating Server Description."""
 
 import json
+import re
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-from build.scripts.update_server_description import main, parse_args
+from build.scripts.update_server_description import (
+    get_persistent_server_id,
+    main,
+    parse_args,
+)
 from pytest import MonkeyPatch
 from pytest_mock import MockerFixture
+
+
+def test_get_persistent_server_id_from_file(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Reuse the id persisted on the data volume from a previous start.
+
+    :param tmp_path:
+    :param monkeypatch:
+    :return:
+    """
+    id_file = tmp_path / "persistent_server_id"
+    id_file.write_text("PERSISTED_SERVER_ID\n")
+    monkeypatch.setenv("PERSISTENT_SERVER_ID_FILE", str(id_file))
+    assert get_persistent_server_id() == "PERSISTED_SERVER_ID"
+
+
+def test_get_persistent_server_id_generated(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Generate a new id and persist it when none exists yet.
+
+    :param tmp_path:
+    :param monkeypatch:
+    :return:
+    """
+    id_file = tmp_path / "subdir" / "persistent_server_id"
+    monkeypatch.setenv("PERSISTENT_SERVER_ID_FILE", str(id_file))
+
+    persistent_server_id = get_persistent_server_id()
+
+    assert re.fullmatch(r"[0-9A-F]{32}", persistent_server_id)
+    assert id_file.read_text() == persistent_server_id
+    # A subsequent call returns the same persisted id.
+    assert get_persistent_server_id() == persistent_server_id
 
 
 def test_argument_parser(server_description_path: Path):
@@ -41,7 +81,7 @@ def test_argument_parser(server_description_path: Path):
                 "Version": 1,
                 "DeploymentId": "0.10.0.3.104-256f9653",
                 "ServerDescription_Persistent": {
-                    "PersistentServerId": "9BE66DD44655244015C1B3AC3CE4515A",
+                    "PersistentServerId": "FAKE_PERSISTENT_SERVER_ID",
                     "InviteCode": "fake_invite_code",
                     "IsPasswordProtected": True,
                     "Password": "fake_password",
@@ -74,7 +114,7 @@ def test_argument_parser(server_description_path: Path):
                 "Version": 1,
                 "DeploymentId": "0.10.0.3.104-256f9653",
                 "ServerDescription_Persistent": {
-                    "PersistentServerId": "9BE66DD44655244015C1B3AC3CE4515A",
+                    "PersistentServerId": "FAKE_PERSISTENT_SERVER_ID",
                     "InviteCode": "fake_invite_code",
                     "IsPasswordProtected": False,
                     "Password": "",
@@ -107,7 +147,7 @@ def test_argument_parser(server_description_path: Path):
                 "Version": 1,
                 "DeploymentId": "0.10.0.3.104-256f9653",
                 "ServerDescription_Persistent": {
-                    "PersistentServerId": "9BE66DD44655244015C1B3AC3CE4515A",
+                    "PersistentServerId": "FAKE_PERSISTENT_SERVER_ID",
                     "InviteCode": "d2be7c90",
                     "IsPasswordProtected": False,
                     "Password": "",
@@ -127,6 +167,7 @@ def test_argument_parser(server_description_path: Path):
 )
 def test_update_server_description(
     server_description_path: Path,
+    tmp_path: Path,
     mocker: MockerFixture,
     monkeypatch: MonkeyPatch,
     fake_invite_code: str | None,
@@ -165,7 +206,11 @@ def test_update_server_description(
         "build.scripts.update_server_description.parse_args", return_value=mocked_args
     )
 
+    id_file = tmp_path / "persistent_server_id"
+    id_file.write_text("FAKE_PERSISTENT_SERVER_ID")
+
     with monkeypatch.context() as mp:
+        mp.setenv("PERSISTENT_SERVER_ID_FILE", str(id_file))
         if fake_invite_code is not None:
             mp.setenv("INVITE_CODE", fake_invite_code)
         if fake_password is not None:

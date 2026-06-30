@@ -1,10 +1,38 @@
-"""Update Server Descriptiin."""
+"""Update Server Description."""
 
 import json
 import sys
+import uuid
 from argparse import ArgumentParser
 from os import getenv
 from pathlib import Path
+
+DEFAULT_PERSISTENT_SERVER_ID_FILE = "/srv/windrose/R5/Saved/persistent_server_id"
+
+
+def get_persistent_server_id() -> str:
+    """Return a stable, unique PersistentServerId.
+
+    The game expects a 32-character uppercase hexadecimal string, e.g.
+    "1B80182E460F727CEA080C8EEBB1EA0A", and the id must be both unique per
+    server and persistent across restarts (the invite code is resolved via
+    this id by the connection service).
+
+    The id is read from the data volume if it was persisted on a previous
+    start, otherwise a new id is generated and persisted for future starts.
+
+    :return:
+    """
+    id_file: Path = Path(
+        getenv("PERSISTENT_SERVER_ID_FILE", DEFAULT_PERSISTENT_SERVER_ID_FILE)
+    )
+    if id_file.exists():
+        return id_file.read_text().strip()
+
+    persistent_server_id: str = uuid.uuid4().hex.upper()
+    id_file.parent.mkdir(parents=True, exist_ok=True)
+    id_file.write_text(persistent_server_id)
+    return persistent_server_id
 
 
 def parse_args(args: list[str]):
@@ -67,6 +95,10 @@ def main() -> None:
         server_description = json.load(server_description_file)
 
     current_worlds = get_current_worlds(get_game_version(server_description))
+
+    server_description["ServerDescription_Persistent"]["PersistentServerId"] = (
+        get_persistent_server_id()
+    )
 
     invite_code: str | None = getenv("INVITE_CODE")
     password: str = getenv("PASSWORD", "")
