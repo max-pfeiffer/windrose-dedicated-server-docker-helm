@@ -8,6 +8,7 @@ from os import getenv
 from pathlib import Path
 
 DEFAULT_PERSISTENT_SERVER_ID_FILE = "/srv/windrose/R5/Saved/persistent_server_id"
+DEFAULT_WORLD_ISLAND_ID_FILE = "/srv/windrose/R5/Saved/world_island_id"
 
 
 def get_persistent_server_id() -> str:
@@ -33,6 +34,61 @@ def get_persistent_server_id() -> str:
     id_file.parent.mkdir(parents=True, exist_ok=True)
     id_file.write_text(persistent_server_id)
     return persistent_server_id
+
+
+def get_world_island_id(current_worlds: list[str]) -> str | None:
+    """Return the WorldIslandId of the world the server should load.
+
+    The id is resolved in this order:
+
+    1. WORLD_ISLAND_ID environment variable: lets the user switch to another
+       world, e.g. an imported save game.
+    2. The id persisted on the data volume from a previous start.
+    3. The single existing world directory, if there is exactly one.
+
+    The resolved id is persisted on the data volume, so the server keeps
+    loading the same world on future starts even if additional worlds are
+    imported later or the environment variable is removed. If no world exists
+    yet, None is returned and the server generates a new world on startup.
+
+    :param current_worlds:
+    :return:
+    """
+    id_file: Path = Path(getenv("WORLD_ISLAND_ID_FILE", DEFAULT_WORLD_ISLAND_ID_FILE))
+
+    world_island_id: str | None = getenv("WORLD_ISLAND_ID")
+    if world_island_id:
+        if world_island_id not in current_worlds:
+            print(
+                f"World with WORLD_ISLAND_ID {world_island_id} does not exist. "
+                f"Available worlds: {current_worlds}"
+            )
+            exit(1)
+    elif id_file.exists():
+        world_island_id = id_file.read_text().strip()
+        if world_island_id not in current_worlds:
+            print(
+                f"Persisted world {world_island_id} does not exist anymore. "
+                f"Available worlds: {current_worlds}. "
+                f"Set WORLD_ISLAND_ID to choose a world."
+            )
+            exit(1)
+    elif len(current_worlds) == 0:
+        print("Windrose Server is generating a new world ID")
+        return None
+    elif len(current_worlds) == 1:
+        world_island_id = current_worlds[0]
+    else:
+        print(
+            f"Multiple worlds found, cannot determine the correct world. "
+            f"Available worlds: {current_worlds}. "
+            f"Set WORLD_ISLAND_ID to choose a world."
+        )
+        exit(1)
+
+    id_file.parent.mkdir(parents=True, exist_ok=True)
+    id_file.write_text(world_island_id)
+    return world_island_id
 
 
 def parse_args(args: list[str]):
@@ -123,15 +179,11 @@ def main() -> None:
         "DIRECT_CONNECTION_PROXY_ADDRESS"
     )
 
-    if len(current_worlds) == 0:
-        print("Windrose Server is generating a new world ID")
-    elif len(current_worlds) == 1:
+    world_island_id: str | None = get_world_island_id(current_worlds)
+    if world_island_id is not None:
         server_description["ServerDescription_Persistent"]["WorldIslandId"] = (
-            current_worlds[0]
+            world_island_id
         )
-    else:
-        print("Multiple worlds found, cannot determine the correct world")
-        exit(1)
 
     if invite_code is not None:
         server_description["ServerDescription_Persistent"]["InviteCode"] = invite_code

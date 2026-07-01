@@ -50,6 +50,8 @@ You can configure the Windrose server with the following environment variables:
 * `DIRECT_CONNECTION_SERVER_ADDRESS` - address for direct connection. For future purposes. Not used now.
 * `DIRECT_CONNECTION_SERVER_PORT` - port for direct connection. Should be available for TCP and UDP connection if UseDirectConnection is true.
 * `DIRECT_CONNECTION_PROXY_ADDRESS` - can be used to choose specified network on computer where server with direct connection is running. 0.0.0.0 should be used by default.
+* `WORLD_ISLAND_ID` - ID of the world the server should load. Only needed if you want to switch to another world,
+   see [Importing a save game](#importing-a-save-game).
 
 Use `--env` to set these variables in the Docker image.
 

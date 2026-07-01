@@ -107,6 +107,11 @@ instances:
     # If left empty, the server will automatically detect and select the optimal region based on latency. If desired
     # region is specified (for example, EU), the server will use that region exclusively.
     userSelectedRegion: ""
+    # ID of the world the server should load, matching a world directory name in
+    # R5/Saved/SaveProfiles/Default/RocksDB_v2/<game_version>/Worlds on the server volume.
+    # Set this to switch to another world, e.g. an imported save game. If left empty, the server
+    # keeps loading the world it used before or generates a new one on first start.
+    worldIslandId: ""
     # Service configuration for this instance
     service:
       type: LoadBalancer

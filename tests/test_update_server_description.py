@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 from build.scripts.update_server_description import (
     get_persistent_server_id,
+    get_world_island_id,
     main,
     parse_args,
 )
@@ -48,6 +49,124 @@ def test_get_persistent_server_id_generated(
     assert id_file.read_text() == persistent_server_id
     # A subsequent call returns the same persisted id.
     assert get_persistent_server_id() == persistent_server_id
+
+
+def test_get_world_island_id_from_environment(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Use the world from the environment variable and persist it.
+
+    The environment variable takes precedence over a previously persisted id.
+
+    :param tmp_path:
+    :param monkeypatch:
+    :return:
+    """
+    id_file = tmp_path / "world_island_id"
+    id_file.write_text("OLD_WORLD")
+    monkeypatch.setenv("WORLD_ISLAND_ID_FILE", str(id_file))
+    monkeypatch.setenv("WORLD_ISLAND_ID", "IMPORTED_WORLD")
+
+    assert get_world_island_id(["OLD_WORLD", "IMPORTED_WORLD"]) == "IMPORTED_WORLD"
+    assert id_file.read_text() == "IMPORTED_WORLD"
+
+
+def test_get_world_island_id_from_environment_not_existing(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Fail if the world from the environment variable does not exist.
+
+    :param tmp_path:
+    :param monkeypatch:
+    :return:
+    """
+    monkeypatch.setenv("WORLD_ISLAND_ID_FILE", str(tmp_path / "world_island_id"))
+    monkeypatch.setenv("WORLD_ISLAND_ID", "MISSING_WORLD")
+
+    with pytest.raises(SystemExit):
+        get_world_island_id(["EXISTING_WORLD"])
+
+
+def test_get_world_island_id_from_file(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Reuse the id persisted on the data volume from a previous start.
+
+    :param tmp_path:
+    :param monkeypatch:
+    :return:
+    """
+    id_file = tmp_path / "world_island_id"
+    id_file.write_text("PERSISTED_WORLD\n")
+    monkeypatch.setenv("WORLD_ISLAND_ID_FILE", str(id_file))
+
+    assert (
+        get_world_island_id(["PERSISTED_WORLD", "IMPORTED_WORLD"]) == "PERSISTED_WORLD"
+    )
+
+
+def test_get_world_island_id_from_file_not_existing(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Fail if the persisted world does not exist anymore.
+
+    :param tmp_path:
+    :param monkeypatch:
+    :return:
+    """
+    id_file = tmp_path / "world_island_id"
+    id_file.write_text("PERSISTED_WORLD")
+    monkeypatch.setenv("WORLD_ISLAND_ID_FILE", str(id_file))
+
+    with pytest.raises(SystemExit):
+        get_world_island_id(["OTHER_WORLD"])
+
+
+def test_get_world_island_id_no_worlds(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Let the server generate a new world if none exists yet.
+
+    :param tmp_path:
+    :param monkeypatch:
+    :return:
+    """
+    id_file = tmp_path / "world_island_id"
+    monkeypatch.setenv("WORLD_ISLAND_ID_FILE", str(id_file))
+
+    assert get_world_island_id([]) is None
+    assert not id_file.exists()
+
+
+def test_get_world_island_id_single_world(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Use the single existing world and persist it.
+
+    :param tmp_path:
+    :param monkeypatch:
+    :return:
+    """
+    id_file = tmp_path / "subdir" / "world_island_id"
+    monkeypatch.setenv("WORLD_ISLAND_ID_FILE", str(id_file))
+
+    assert get_world_island_id(["SINGLE_WORLD"]) == "SINGLE_WORLD"
+    assert id_file.read_text() == "SINGLE_WORLD"
+
+
+def test_get_world_island_id_multiple_worlds(
+    tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Fail if the world cannot be determined from multiple worlds.
+
+    :param tmp_path:
+    :param monkeypatch:
+    :return:
+    """
+    monkeypatch.setenv("WORLD_ISLAND_ID_FILE", str(tmp_path / "world_island_id"))
+
+    with pytest.raises(SystemExit):
+        get_world_island_id(["WORLD_A", "WORLD_B"])
 
 
 def test_argument_parser(server_description_path: Path):
@@ -211,6 +330,7 @@ def test_update_server_description(
 
     with monkeypatch.context() as mp:
         mp.setenv("PERSISTENT_SERVER_ID_FILE", str(id_file))
+        mp.setenv("WORLD_ISLAND_ID_FILE", str(tmp_path / "world_island_id"))
         if fake_invite_code is not None:
             mp.setenv("INVITE_CODE", fake_invite_code)
         if fake_password is not None:
