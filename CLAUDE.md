@@ -1,0 +1,70 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What this repo is
+
+Docker image and Helm chart for running the Windrose dedicated game server (a Windows binary, Steam app 4129620) on Linux via Wine. Three deliverables:
+
+- `build/` — Dockerfile plus a Python CLI that builds and publishes the image to Docker Hub (`pfeiffermax/windrose-dedicated-server`)
+- `charts/windrose/` — Helm chart for Kubernetes deployments
+- `examples/docker-compose/` — docker compose example with an update script
+
+## Commands
+
+Python tooling uses Poetry (Python >= 3.13):
+
+```shell
+poetry install --with dev --no-interaction --no-root
+
+# Run all tests (requires a running Docker daemon; the image-build test is slow —
+# it downloads the game server via steamcmd inside the build)
+poetry run pytest
+
+# Run a single test
+poetry run pytest tests/test_utils.py::test_create_tag
+
+# Coverage as in CI
+poetry run pytest --cov build --cov-report=xml
+
+# Lint/format (ruff via pre-commit, same as the code-quality CI job)
+poetry run pre-commit run -a
+
+# Helm chart
+helm lint charts/windrose
+helm template charts/windrose
+```
+
+Ruff is configured in `pyproject.toml` (`src = ["build", "tests"]`, pydocstyle pep257 convention; `charts/` and `examples/` excluded).
+
+## Release automation
+
+There is no versioned app release process — releases are driven by upstream game updates:
+
+- `.github/workflows/publish.yaml` runs nightly and calls `docker-image.yaml`, which runs `poetry run python -m build.publish`. That CLI queries Steam for the current build ID of the Windrose public branch (`build/utils.py:get_windrose_build_id`), and if no `build-<buildid>` tag exists on Docker Hub yet, builds and pushes the image tagged `build-<buildid>` and `latest`. `publish-manual.yaml` (workflow_dispatch) forces a build via the `--publish-manually` flag.
+- The Helm chart is published by chart-releaser on push to `main` when `charts/**` changes (`helm-release.yaml`). **Bump `version` in `charts/windrose/Chart.yaml` for any chart change**, or the release job will fail on the existing version.
+
+## Docker image architecture
+
+`build/Dockerfile` is a two-stage build: the install stage downloads the Windows server files with steamcmd (`+@sSteamCmdForcePlatformType windows`); the production stage is based on `pfeiffermax/debian-wine`, runs as unprivileged user `windrose` (UID/GID 10001), and initializes a Wine prefix under Xvfb at build time.
+
+Runtime flow (`build/scripts/start.sh`, the entrypoint):
+1. If `CONFIG_FILE_PATH` / `SECRET_FILE_PATH` are set, source those files as environment variables — this is how the Helm chart injects per-instance config.
+2. Run `update_server_description.py`, which writes env vars (`SERVER_NAME`, `PASSWORD`, `INVITE_CODE`, `MAX_PLAYER_COUNT`, etc.) into the server's `ServerDescription.json` and pins `WorldIslandId` to the existing world save if exactly one exists.
+3. Start the server executable with `xvfb-run wine`, then tail the server log file (the wine process itself is backgrounded; the tail keeps the container alive).
+
+All persistent state lives in `/srv/windrose/R5/Saved` — that path must be volume-mounted.
+
+## Helm chart architecture
+
+The chart runs **multiple server instances from one StatefulSet**: `replicas` equals `len .Values.instances`. Per-instance wiring is keyed on the pod name (`<fullname>-<index>`):
+
+- The ConfigMap and Secret each contain one entry per instance named after the pod; the StatefulSet mounts them and sets `CONFIG_FILE_PATH`/`SECRET_FILE_PATH` to `/srv/windrose/config/$(POD_NAME)` and `/srv/windrose/secret/$(POD_NAME)`, which `start.sh` sources.
+- Each instance gets its own LoadBalancer Service selecting on `statefulset.kubernetes.io/pod-name`, plus a shared headless Service for the StatefulSet.
+- `windroseDedicatedServer.existingSecret` suppresses Secret creation and uses the named secret instead.
+- The chart hardcodes `USE_DIRECT_CONNECTION=true` in the ConfigMap: the ICE/P2P mode uses dynamic ports, which is incompatible with Kubernetes networking.
+- Startup/liveness probes are `nc` UDP checks against the server port; server startup (world generation) is slow, hence the high startup `failureThreshold`.
+
+## Tests
+
+Tests live in `tests/` and exercise the build tooling, not the game server: `test_image_build.py`/`test_publish.py` build and push the real image to a throwaway local registry (testcontainers) — these need Docker and significant time/disk. `test_update_server_description.py` tests the container's config-injection script against `tests/assets/ServerDescription.json`. Note that `build/scripts/update_server_description.py` is a standalone script copied into the image; it must stay stdlib-only (the container only has `python3`, no pip packages).
