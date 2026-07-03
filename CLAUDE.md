@@ -39,7 +39,9 @@ Ruff is configured in `pyproject.toml` (`src = ["build", "tests"]`, pydocstyle p
 
 ## Release automation
 
-There is no versioned app release process — releases are driven by upstream game updates:
+Repo releases are automated with release-please (`.github/workflows/release.yaml`, config in `release-please-config.json` / `.release-please-manifest.json`): it runs on push to `main`, collects conventional commits (chart commits under `charts/` are excluded), and maintains a release PR that bumps `pyproject.toml`, updates `CHANGELOG.md`, and tags releases as plain `X.Y.Z` (no `v` prefix). **Commits to `main` must follow conventional commits** (`feat:`, `fix:`, …) to show up in releases.
+
+Docker image and Helm chart releases are separate processes driven independently:
 
 - `.github/workflows/publish.yaml` runs nightly and calls `docker-image.yaml`, which runs `poetry run python -m build.publish`. That CLI queries Steam for the current build ID of the Windrose public branch (`build/utils.py:get_windrose_build_id`), and if no `build-<buildid>` tag exists on Docker Hub yet, builds and pushes the image tagged `build-<buildid>` and `latest`. `publish-manual.yaml` (workflow_dispatch) forces a build via the `--publish-manually` flag.
 - The Helm chart is published by chart-releaser on push to `main` when `charts/**` changes (`helm-release.yaml`). **Bump `version` in `charts/windrose/Chart.yaml` for any chart change**, or the release job will fail on the existing version.
