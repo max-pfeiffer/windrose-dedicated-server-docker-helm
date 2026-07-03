@@ -4,6 +4,7 @@
     "config:recommended"
   ],
   "schedule": ["* * * * 4"],
+  "semanticCommits": "enabled",
   "enabledManagers": ["poetry"],
   "packageRules": [
     {
