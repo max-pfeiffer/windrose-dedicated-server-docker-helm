@@ -5,6 +5,7 @@
   "packages": {
     ".": {
       "release-type": "python",
+      "package-name": "windrose-dedicated-server-docker-helm",
       "changelog-path": "CHANGELOG.md",
       "exclude-paths": ["charts"]
     }
