@@ -52,6 +52,12 @@ convention = "pep257"
 testpaths = [
     "tests",
 ]
+# The slow tests build the real container image and run containers, so they
+# are deselected by default; run them with: pytest -m slow
+addopts = "-m 'not slow'"
+markers = [
+    "slow: slow tests that build the container image and run containers with Podman",
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

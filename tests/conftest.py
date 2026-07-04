@@ -1,15 +1,28 @@
 """Test fixtures."""
 
+import re
 from collections.abc import Generator
 from pathlib import Path
 from shutil import copyfile
 from tempfile import TemporaryDirectory
-from typing import Any
+from typing import Any, NamedTuple
 
 import pytest
-from click.testing import CliRunner
+from build.publish import main
+from build.utils import create_tag, get_image_reference
+from click.testing import CliRunner, Result
 from python_on_whales import DockerClient
 from testcontainers.registry import DockerRegistryContainer
+
+from tests.constants import REGISTRY_TOKEN, REGISTRY_USERNAME
+
+
+class PublishedImage(NamedTuple):
+    """References of the container image published to the local test registry."""
+
+    registry: str
+    tag: str
+    image_reference_latest: str
 
 
 @pytest.fixture(scope="function")
@@ -44,6 +57,47 @@ def registry_container() -> Generator[DockerRegistryContainer, Any]:
     """
     with DockerRegistryContainer().with_bind_ports(5000, 5000) as registry_container:
         yield registry_container
+
+
+@pytest.fixture(scope="session")
+def published_image(
+    registry_container: DockerRegistryContainer,
+    cli_runner: CliRunner,
+) -> PublishedImage:
+    """Build the container image once and publish it to the local test registry.
+
+    Building the image is slow (steamcmd downloads the game server inside the
+    build), so the build runs once per test session and all slow tests share
+    the resulting image.
+
+    :param registry_container:
+    :param cli_runner:
+    :return:
+    """
+    result: Result = cli_runner.invoke(
+        main,
+        env={
+            "DOCKER_HUB_USERNAME": REGISTRY_USERNAME,
+            "DOCKER_HUB_TOKEN": REGISTRY_TOKEN,
+            "REGISTRY": registry_container.get_registry(),
+            "PUBLISH_MANUALLY": "1",
+        },
+    )
+    assert result.exit_code == 0, result.output
+
+    # The publish CLI already queried Steam for the current build id, so it is
+    # reused from the CLI output instead of a second Steam round trip.
+    match: re.Match[str] | None = re.search(
+        r"Current Windrose server build ID: (\S+)", result.output
+    )
+    assert match is not None, result.output
+
+    registry: str = registry_container.get_registry()
+    return PublishedImage(
+        registry=registry,
+        tag=create_tag(match.group(1)),
+        image_reference_latest=get_image_reference(registry, "latest"),
+    )
 
 
 @pytest.fixture(scope="session")

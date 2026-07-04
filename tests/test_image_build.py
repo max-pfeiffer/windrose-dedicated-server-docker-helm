@@ -1,68 +1,40 @@
-"""Tests container image build."""
+"""Tests building the container image and publishing it to a registry."""
 
-from build.publish import main
-from build.utils import (
-    create_tag,
-    get_windrose_build_id,
-)
-from click.testing import CliRunner, Result
+import pytest
 from furl import furl
-from python_on_whales import DockerClient
 from requests import Response, get
-from requests.auth import HTTPBasicAuth
-from testcontainers.registry import DockerRegistryContainer
 
-from tests.constants import REGISTRY_PASSWORD, REGISTRY_TOKEN, REGISTRY_USERNAME
+from tests.conftest import PublishedImage
 
-BASIC_AUTH: HTTPBasicAuth = HTTPBasicAuth(REGISTRY_USERNAME, REGISTRY_PASSWORD)
+pytestmark = pytest.mark.slow
 
 
-def test_image_build(
-    registry_container: DockerRegistryContainer,
-    cli_runner: CliRunner,
-    podman_client: DockerClient,
-):
-    """Test building the container image with Podman.
+def test_image_is_published_to_registry(published_image: PublishedImage) -> None:
+    """Test that the built image was pushed with the build and latest tags.
 
-    :param registry_container:
-    :param cli_runner:
-    :param podman_client:
+    The image itself is built once per session by the published_image fixture.
+
+    :param published_image:
     :return:
     """
-    result: Result = cli_runner.invoke(
-        main,
-        env={
-            "DOCKER_HUB_USERNAME": REGISTRY_USERNAME,
-            "DOCKER_HUB_TOKEN": REGISTRY_TOKEN,
-            "REGISTRY": registry_container.get_registry(),
-            "PUBLISH_MANUALLY": "1",
-        },
-    )
-    assert result.exit_code == 0
+    catalog_url: furl = furl(f"http://{published_image.registry}")
+    catalog_url.path /= "v2/_catalog"
 
-    furl_item: furl = furl(f"http://{registry_container.get_registry()}")
-    furl_item.path /= "v2/_catalog"
-
-    # response: Response = get(furl_item.url, auth=BASIC_AUTH)
-    response: Response = get(furl_item.url)
+    response: Response = get(catalog_url.url)
 
     assert response.status_code == 200
     assert response.json() == {
         "repositories": ["pfeiffermax/windrose-dedicated-server"]
     }
 
-    furl_item: furl = furl(f"http://{registry_container.get_registry()}")
-    furl_item.path /= "v2/pfeiffermax/windrose-dedicated-server/tags/list"
+    tags_url: furl = furl(f"http://{published_image.registry}")
+    tags_url.path /= "v2/pfeiffermax/windrose-dedicated-server/tags/list"
 
-    # response: Response = get(furl_item.url, auth=BASIC_AUTH)
-    response: Response = get(furl_item.url)
+    response = get(tags_url.url)
 
     assert response.status_code == 200
 
     response_image_tags: list[str] = response.json()["tags"]
 
-    current_rust_server_build_id = get_windrose_build_id()
-    tag = create_tag(current_rust_server_build_id)
-
-    assert tag in response_image_tags
+    assert published_image.tag in response_image_tags
     assert "latest" in response_image_tags

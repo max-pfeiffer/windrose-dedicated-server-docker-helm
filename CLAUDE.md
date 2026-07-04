@@ -17,15 +17,20 @@ Python tooling uses Poetry (Python >= 3.13):
 ```shell
 poetry install --with dev --no-interaction --no-root
 
-# Run all tests (requires Podman for the image build/push and a Docker daemon
-# for the testcontainers registry; the image-build test is slow —
-# it downloads the game server via steamcmd inside the build)
+# Run the fast unit tests (tests marked "slow" are deselected by default)
 poetry run pytest
 
-# Run a single test
+# Run the slow tests: image build/push to a throwaway local registry plus
+# container persistence checks (requires Podman for the image build/run and a
+# Docker daemon for the testcontainers registry; slow — the build downloads
+# the game server via steamcmd)
+poetry run pytest -m slow
+
+# Run a single test (add -m slow for tests in slow-marked modules, otherwise
+# the default addopts deselect them)
 poetry run pytest tests/test_utils.py::test_create_tag
 
-# Coverage as in CI
+# Coverage as in CI (CI appends the slow tests with -m slow --cov-append)
 poetry run pytest --cov build --cov-report=xml
 
 # Lint/format (ruff via pre-commit, same as the code-quality CI job)
@@ -70,4 +75,8 @@ The chart runs **multiple server instances from one StatefulSet**: `replicas` eq
 
 ## Tests
 
-Tests live in `tests/` and exercise the build tooling, not the game server: `test_image_build.py` builds and pushes the real image with Podman to a throwaway local registry (testcontainers) — it needs Podman plus Docker and significant time/disk, and Podman must trust `localhost:5000` as an insecure registry (see `test-image-build.yaml`). `test_publish.py` unit-tests the publish CLI with mocks. `test_update_server_description.py` tests the container's config-injection script against `tests/assets/ServerDescription.json`. Note that `build/scripts/update_server_description.py` is a standalone script copied into the image; it must stay stdlib-only (the container only has `python3`, no pip packages).
+Tests live in `tests/` and exercise the build tooling, not the game server. Slow tests are marked `slow` and deselected by default (`addopts = "-m 'not slow'"` in `pyproject.toml`); the image is built **once per session** by the session-scoped `published_image` fixture in `conftest.py` and shared by all slow tests:
+
+- `test_image_build.py` (slow) asserts the image was pushed to a throwaway local registry (testcontainers) with the `build-<buildid>` and `latest` tags — it needs Podman plus Docker and significant time/disk, and Podman must trust `localhost:5000` as an insecure registry (see `test-image-build.yaml`).
+- `test_container.py` (slow) runs a container from the built image and verifies `PersistentServerId` and `WorldIslandId` survive container restarts. It only waits for the entrypoint's config phase (the "ServerDescription.json modified" log line) and never waits for the Wine/world-generation server startup.
+- `test_publish.py` unit-tests the publish CLI with mocks. `test_update_server_description.py` tests the container's config-injection script against `tests/assets/ServerDescription.json`. Note that `build/scripts/update_server_description.py` is a standalone script copied into the image; it must stay stdlib-only (the container only has `python3`, no pip packages).
