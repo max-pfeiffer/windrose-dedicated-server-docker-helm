@@ -9,6 +9,7 @@ from build.utils import (
     create_tag,
     get_context,
     get_image_reference,
+    get_podman_client,
     get_windrose_build_id,
     tag_exists,
 )
@@ -66,9 +67,7 @@ def main(
         image_reference_version: str = get_image_reference(registry, tag)
         image_reference_latest: str = get_image_reference(registry, "latest")
 
-        podman_client: DockerClient = DockerClient(
-            client_call=["podman"], client_type="podman"
-        )
+        podman_client: DockerClient = get_podman_client()
 
         podman_client.login(
             server=registry,

@@ -64,7 +64,7 @@ def patch_publish_dependencies(
     )
     mock_podman_client: MagicMock = MagicMock()
     mock_podman_client.buildx.build.return_value = iter(FAKE_BUILD_LOG)
-    mocker.patch("build.publish.DockerClient", return_value=mock_podman_client)
+    mocker.patch("build.publish.get_podman_client", return_value=mock_podman_client)
 
     yield mock_podman_client
 

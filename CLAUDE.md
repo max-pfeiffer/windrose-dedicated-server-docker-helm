@@ -21,9 +21,11 @@ poetry install --with dev --no-interaction --no-root
 poetry run pytest
 
 # Run the slow tests: image build/push to a throwaway local registry plus
-# container persistence checks (requires Podman for the image build/run and a
-# Docker daemon for the testcontainers registry; slow — the build downloads
-# the game server via steamcmd)
+# container persistence checks (requires only Podman; slow — the build
+# downloads the game server via steamcmd). The build targets linux/amd64;
+# on a non-amd64 machine the tests automatically pick the first Podman
+# system connection with an amd64 host for build, registry, and test
+# containers. Set PODMAN_CONNECTION to pick a connection explicitly.
 poetry run pytest -m slow
 
 # Run a single test (add -m slow for tests in slow-marked modules, otherwise
@@ -77,6 +79,6 @@ The chart runs **multiple server instances from one StatefulSet**: `replicas` eq
 
 Tests live in `tests/` and exercise the build tooling, not the game server. Slow tests are marked `slow` and deselected by default (`addopts = "-m 'not slow'"` in `pyproject.toml`); the image is built **once per session** by the session-scoped `published_image` fixture in `conftest.py` and shared by all slow tests:
 
-- `test_image_build.py` (slow) asserts the image was pushed to a throwaway local registry (testcontainers) with the `build-<buildid>` and `latest` tags — it needs Podman plus Docker and significant time/disk, and Podman must trust `localhost:5000` as an insecure registry (see `test-image-build.yaml`).
+- `test_image_build.py` (slow) asserts the image was pushed to a throwaway local registry with the `build-<buildid>` and `latest` tags. Everything runs with Podman (the registry is a `registry:2` container started by the session-scoped `registry` fixture, no Docker needed) and takes significant time/disk. Podman on the build host must trust the registry address as an insecure registry (see `test-image-build.yaml` for CI; on macOS that means inside the Podman machine or on the remote build host, plus the local client config in `~/.config/containers/registries.conf.d/` for `podman login`). The `podman_connection` fixture selects the Podman system connection used for build, registry, and test containers: `PODMAN_CONNECTION` if set, otherwise the default host when it is amd64, otherwise the first connection with an amd64 host (steamcmd in the install stage is a 32-bit x86 binary that cannot be emulated on arm64). With a remote connection the registry is addressed via the connection's host instead of `localhost:5000`.
 - `test_container.py` (slow) runs a container from the built image and verifies `PersistentServerId` and `WorldIslandId` survive container restarts. It only waits for the entrypoint's config phase (the "ServerDescription.json modified" log line) and never waits for the Wine/world-generation server startup.
 - `test_publish.py` unit-tests the publish CLI with mocks. `test_update_server_description.py` tests the container's config-injection script against `tests/assets/ServerDescription.json`. Note that `build/scripts/update_server_description.py` is a standalone script copied into the image; it must stay stdlib-only (the container only has `python3`, no pip packages).

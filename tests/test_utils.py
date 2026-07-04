@@ -9,10 +9,12 @@ from build.utils import (
     create_tag,
     get_context,
     get_image_reference,
+    get_podman_client,
     get_windrose_build_id,
     tag_exists,
 )
 from pytest_mock import MockerFixture
+from python_on_whales import DockerClient
 
 FAKE_BUILD_ID: str = "98765"
 
@@ -193,6 +195,44 @@ def test_tag_exists_raises_on_http_error(mocker: MockerFixture) -> None:
 
     with pytest.raises(requests.HTTPError):
         tag_exists(FAKE_BUILD_ID)
+
+
+def test_get_podman_client_uses_default_connection(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify that ``get_podman_client`` uses plain Podman without a connection.
+
+    :param monkeypatch: pytest fixture for patching the environment.
+    :type monkeypatch: pytest.MonkeyPatch
+    :return: None
+    :rtype: None
+    """
+    monkeypatch.delenv("PODMAN_CONNECTION", raising=False)
+
+    result: DockerClient = get_podman_client()
+
+    assert result.client_config.client_call == ["podman"]
+
+
+def test_get_podman_client_uses_podman_connection(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify that ``get_podman_client`` honors the PODMAN_CONNECTION env var.
+
+    :param monkeypatch: pytest fixture for patching the environment.
+    :type monkeypatch: pytest.MonkeyPatch
+    :return: None
+    :rtype: None
+    """
+    monkeypatch.setenv("PODMAN_CONNECTION", "remotebuilder")
+
+    result: DockerClient = get_podman_client()
+
+    assert result.client_config.client_call == [
+        "podman",
+        "--connection",
+        "remotebuilder",
+    ]
 
 
 @pytest.mark.parametrize(
