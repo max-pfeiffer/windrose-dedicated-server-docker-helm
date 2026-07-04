@@ -1,4 +1,4 @@
-[![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![codecov](https://codecov.io/gh/max-pfeiffer/windrose-dedicated-server-docker-helm/graph/badge.svg?token=4xXsgY0nah)](https://codecov.io/gh/max-pfeiffer/windrose-dedicated-server-docker-helm)
 [![Code Quality](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/code-quality.yaml/badge.svg)](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/code-quality.yaml)
