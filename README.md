@@ -49,7 +49,9 @@ You can configure the Windrose server with the following environment variables:
 * `USE_DIRECT_CONNECTION` - if true, the server will create sockets for direct connection with clients. If false, the server will use ICE protocol to establish P2P connection.
 * `DIRECT_CONNECTION_SERVER_ADDRESS` - address for direct connection. For future purposes. Not used now.
 * `DIRECT_CONNECTION_SERVER_PORT` - port for direct connection. Should be available for TCP and UDP connection if UseDirectConnection is true.
-* `DIRECT_CONNECTION_PROXY_ADDRESS` - сan be used to choose specified network on computer where server with direct connection is running. 0.0.0.0 should be used by default.
+* `DIRECT_CONNECTION_PROXY_ADDRESS` - can be used to choose specified network on computer where server with direct connection is running. 0.0.0.0 should be used by default.
+* `WORLD_ISLAND_ID` - ID of the world the server should load. Only needed if you want to switch to another world,
+   see [Importing a save game](#importing-a-save-game).
 
 Use `--env` to set these variables in the Docker image.
 
@@ -57,6 +59,12 @@ As the Windrose server is running in the Docker container as a stateless applica
 data (config, saves, etc.) stored in a [Docker volume](https://docs.docker.com/storage/volumes/)
 which is persisted **outside** the container. By default, the Windrose server stores that data in `/srv/windrose/R5/Saved`.
 You need to make sure that this directory is mounted on a [Docker Volume](https://docs.docker.com/storage/volumes/).
+
+The server needs a unique and stable `PersistentServerId` so that invite codes keep resolving to your server. On the
+first start a new id is generated automatically and persisted to `/srv/windrose/R5/Saved/persistent_server_id` so it
+survives container restarts. As long as you mount `/srv/windrose/R5/Saved` on a Docker Volume, you do not need to do
+anything. If you want to store this id somewhere else, you can override its location with the optional
+`PERSISTENT_SERVER_ID_FILE` environment variable.
 
 ### Docker Run
 For testing purposes, you can fire up a Docker container like this:

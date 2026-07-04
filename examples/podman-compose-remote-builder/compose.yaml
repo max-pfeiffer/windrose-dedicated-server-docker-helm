@@ -1,9 +1,9 @@
-name: windrose
+name: windrose-remote-builder
 
 services:
   init-container:
     image: alpine:3.23
-    container_name: "init-container"
+    container_name: "windrose-remote-builder-init"
     user: root
     command:
       - "/bin/sh"
@@ -14,9 +14,14 @@ services:
         source: save_dir
         target: "/srv/windrose/R5/Saved"
   windrose-server:
-    image: "pfeiffermax/windrose-dedicated-server:latest"
-    pull_policy: always
-    container_name: "windrose-server"
+    # A locally built image on the remote builder, e.g.:
+    # podman --connection remotebuilder build --tag windrose:test build
+    image: "${WINDROSE_IMAGE:-localhost/windrose:test}"
+    pull_policy: never
+    container_name: "windrose-remote-builder-server"
+    depends_on:
+      init-container:
+        condition: service_completed_successfully
     environment:
       PASSWORD: "supersecret"
       SERVER_NAME: "Atlantis"
@@ -37,4 +42,4 @@ services:
 
 volumes:
   save_dir:
-    name: "windrose-save-dir"
+    name: "windrose-remote-builder-save-dir"

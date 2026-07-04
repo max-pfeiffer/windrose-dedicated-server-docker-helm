@@ -1,4 +1,4 @@
-FROM debian:trixie-slim AS install-stage
+FROM --platform=linux/amd64 docker.io/library/debian:trixie-slim AS install-stage
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
@@ -14,7 +14,7 @@ RUN wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz 
 RUN ./steamcmd.sh +login anonymous +quit
 RUN ./steamcmd.sh +@sSteamCmdForcePlatformType windows +force_install_dir /srv/windrose +login anonymous +app_update 4129620 validate +quit
 
-FROM pfeiffermax/debian-wine:11.0.0 AS production-image
+FROM --platform=linux/amd64 docker.io/pfeiffermax/debian-wine:11.0.0 AS production-image
 
 # Principle of least privilege: create a new user for running the application
 RUN groupadd -g 10001 windrose && \

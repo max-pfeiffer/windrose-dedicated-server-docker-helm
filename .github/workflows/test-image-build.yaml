@@ -19,9 +19,20 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install --with dev --no-interaction --no-root
-      - name: Run tests with pytest
+      - name: Configure Podman to allow the insecure local test registry
+        run: |
+          sudo mkdir -p /etc/containers/registries.conf.d
+          sudo tee /etc/containers/registries.conf.d/insecure-localhost.conf > /dev/null <<'EOF'
+          [[registry]]
+          location = "localhost:5000"
+          insecure = true
+          EOF
+      - name: Run fast unit tests with pytest
         run: |
           poetry run pytest --cov build --cov-report=xml
+      - name: Run slow container image tests with pytest
+        run: |
+          poetry run pytest -m slow --cov build --cov-append --cov-report=xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v6
         with:
