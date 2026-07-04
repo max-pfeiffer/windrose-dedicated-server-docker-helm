@@ -28,12 +28,12 @@ def server_description_path() -> Generator[Path, Any]:
 
 
 @pytest.fixture(scope="session")
-def docker_client() -> DockerClient:
-    """Provide the Python on Whales docker client.
+def podman_client() -> DockerClient:
+    """Provide the Python on Whales client configured for Podman.
 
     :return:
     """
-    return DockerClient(debug=True)
+    return DockerClient(client_call=["podman"], client_type="podman", debug=True)
 
 
 @pytest.fixture(scope="session")

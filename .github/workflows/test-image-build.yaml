@@ -19,6 +19,14 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install --with dev --no-interaction --no-root
+      - name: Configure Podman to allow the insecure local test registry
+        run: |
+          sudo mkdir -p /etc/containers/registries.conf.d
+          sudo tee /etc/containers/registries.conf.d/insecure-localhost.conf > /dev/null <<'EOF'
+          [[registry]]
+          location = "localhost:5000"
+          insecure = true
+          EOF
       - name: Run tests with pytest
         run: |
           poetry run pytest --cov build --cov-report=xml

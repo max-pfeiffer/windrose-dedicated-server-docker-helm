@@ -1,10 +1,9 @@
 """Publish CLI."""
 
-from os import getenv
 from pathlib import Path
 
 import click
-from python_on_whales import Builder, DockerClient
+from python_on_whales import DockerClient
 
 from build.utils import (
     create_tag,
@@ -27,13 +26,13 @@ from build.utils import (
     help="Docker Hub token",
 )
 @click.option(
-    "--registry", envvar="REGISTRY", default="docker.io", help="Docker registry"
+    "--registry", envvar="REGISTRY", default="docker.io", help="Container registry"
 )
 @click.option(
     "--publish-manually",
     envvar="PUBLISH_MANUALLY",
     is_flag=True,
-    help="Flag for building the Docker image manually, "
+    help="Flag for building the container image manually, "
     "overrides the check for existing image tags",
 )
 def main(
@@ -42,7 +41,7 @@ def main(
     registry: str,
     publish_manually: bool,
 ) -> None:
-    """Build and publish image to Docker Hub.
+    """Build image with Podman and publish it to Docker Hub.
 
     :param docker_hub_username:
     :param docker_hub_token:
@@ -50,7 +49,6 @@ def main(
     :param publish_manually:
     :return:
     """
-    github_ref_name: str = getenv("GITHUB_REF_NAME")
     context: Path = get_context()
 
     click.echo("Checking Windrose server build ID for release branch...")
@@ -59,46 +57,41 @@ def main(
 
     if not publish_manually and tag_exists(current_windrose_server_build_id):
         click.echo(
-            "Image for this build ID already exists. Skipping Docker image build..."
+            "Image for this build ID already exists. Skipping container image build..."
         )
     else:
-        click.echo("Building Windrose server Docker image...")
+        click.echo("Building Windrose server container image...")
 
         tag = create_tag(current_windrose_server_build_id)
         image_reference_version: str = get_image_reference(registry, tag)
         image_reference_latest: str = get_image_reference(registry, "latest")
-        if github_ref_name:
-            cache_to: str = f"type=gha,mode=max,scope={github_ref_name}"
-            cache_from: str = f"type=gha,scope={github_ref_name}"
-        else:
-            cache_to = f"type=local,mode=max,dest=/tmp,scope={github_ref_name}"
-            cache_from = f"type=local,src=/tmp,scope={github_ref_name}"
 
-        docker_client: DockerClient = DockerClient()
-        builder: Builder = docker_client.buildx.create(
-            driver="docker-container", driver_options=dict(network="host")
+        podman_client: DockerClient = DockerClient(
+            client_call=["podman"], client_type="podman"
         )
 
-        docker_client.login(
+        podman_client.login(
             server=registry,
             username=docker_hub_username,
             password=docker_hub_token,
         )
 
-        docker_client.buildx.build(
+        # Podman has no --push flag on build, so build and push separately.
+        # stream_logs=True keeps python_on_whales from inspecting buildx
+        # builders, which Podman's buildx compatibility alias does not provide.
+        build_log_stream = podman_client.buildx.build(
             context_path=context,
+            file=context / "Containerfile",
             target="production-image",
             tags=[image_reference_version, image_reference_latest],
             platforms=["linux/amd64"],
-            builder=builder,
-            cache_to=cache_to,
-            cache_from=cache_from,
-            push=True,
+            stream_logs=True,
         )
+        for log_line in build_log_stream:
+            click.echo(log_line, nl=False)
 
-        # Cleanup
-        docker_client.buildx.stop(builder)
-        docker_client.buildx.remove(builder)
+        click.echo("Pushing Windrose server container image...")
+        podman_client.push([image_reference_version, image_reference_latest])
 
 
 if __name__ == "__main__":

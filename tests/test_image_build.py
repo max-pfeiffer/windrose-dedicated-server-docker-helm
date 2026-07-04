@@ -1,4 +1,4 @@
-"""Tests Docker image build."""
+"""Tests container image build."""
 
 from build.publish import main
 from build.utils import (
@@ -20,13 +20,13 @@ BASIC_AUTH: HTTPBasicAuth = HTTPBasicAuth(REGISTRY_USERNAME, REGISTRY_PASSWORD)
 def test_image_build(
     registry_container: DockerRegistryContainer,
     cli_runner: CliRunner,
-    docker_client: DockerClient,
+    podman_client: DockerClient,
 ):
-    """Test building the Docker image.
+    """Test building the container image with Podman.
 
     :param registry_container:
     :param cli_runner:
-    :param docker_client:
+    :param podman_client:
     :return:
     """
     result: Result = cli_runner.invoke(

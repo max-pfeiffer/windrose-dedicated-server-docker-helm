@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Docker image and Helm chart for running the Windrose dedicated game server (a Windows binary, Steam app 4129620) on Linux via Wine. Three deliverables:
 
-- `build/` — Dockerfile plus a Python CLI that builds and publishes the image to Docker Hub (`pfeiffermax/windrose-dedicated-server`)
+- `build/` — Containerfile plus a Python CLI that builds the image with Podman (via python_on_whales) and publishes it to Docker Hub (`pfeiffermax/windrose-dedicated-server`)
 - `charts/windrose/` — Helm chart for Kubernetes deployments
 - `examples/docker-compose/` — docker compose example with an update script
 
@@ -17,7 +17,8 @@ Python tooling uses Poetry (Python >= 3.13):
 ```shell
 poetry install --with dev --no-interaction --no-root
 
-# Run all tests (requires a running Docker daemon; the image-build test is slow —
+# Run all tests (requires Podman for the image build/push and a Docker daemon
+# for the testcontainers registry; the image-build test is slow —
 # it downloads the game server via steamcmd inside the build)
 poetry run pytest
 
@@ -43,12 +44,12 @@ Repo releases are automated with release-please (`.github/workflows/release.yaml
 
 Docker image and Helm chart releases are separate processes driven independently:
 
-- `.github/workflows/publish.yaml` runs nightly and calls `docker-image.yaml`, which runs `poetry run python -m build.publish`. That CLI queries Steam for the current build ID of the Windrose public branch (`build/utils.py:get_windrose_build_id`), and if no `build-<buildid>` tag exists on Docker Hub yet, builds and pushes the image tagged `build-<buildid>` and `latest`. `publish-manual.yaml` (workflow_dispatch) forces a build via the `--publish-manually` flag.
+- `.github/workflows/publish.yaml` runs nightly and calls `docker-image.yaml`, which runs `poetry run python -m build.publish`. That CLI queries Steam for the current build ID of the Windrose public branch (`build/utils.py:get_windrose_build_id`), and if no `build-<buildid>` tag exists on Docker Hub yet, builds the image with Podman and pushes it tagged `build-<buildid>` and `latest`. `publish-manual.yaml` (workflow_dispatch) forces a build via the `--publish-manually` flag.
 - The Helm chart is published by chart-releaser on push to `main` when `charts/**` changes (`helm-release.yaml`). **Bump `version` in `charts/windrose/Chart.yaml` for any chart change**, or the release job will fail on the existing version.
 
 ## Docker image architecture
 
-`build/Dockerfile` is a two-stage build: the install stage downloads the Windows server files with steamcmd (`+@sSteamCmdForcePlatformType windows`); the production stage is based on `pfeiffermax/debian-wine`, runs as unprivileged user `windrose` (UID/GID 10001), and initializes a Wine prefix under Xvfb at build time.
+`build/Containerfile` is a two-stage build: the install stage downloads the Windows server files with steamcmd (`+@sSteamCmdForcePlatformType windows`); the production stage is based on `pfeiffermax/debian-wine`, runs as unprivileged user `windrose` (UID/GID 10001), and initializes a Wine prefix under Xvfb at build time.
 
 Runtime flow (`build/scripts/start.sh`, the entrypoint):
 1. If `CONFIG_FILE_PATH` / `SECRET_FILE_PATH` are set, source those files as environment variables — this is how the Helm chart injects per-instance config.
@@ -69,4 +70,4 @@ The chart runs **multiple server instances from one StatefulSet**: `replicas` eq
 
 ## Tests
 
-Tests live in `tests/` and exercise the build tooling, not the game server: `test_image_build.py`/`test_publish.py` build and push the real image to a throwaway local registry (testcontainers) — these need Docker and significant time/disk. `test_update_server_description.py` tests the container's config-injection script against `tests/assets/ServerDescription.json`. Note that `build/scripts/update_server_description.py` is a standalone script copied into the image; it must stay stdlib-only (the container only has `python3`, no pip packages).
+Tests live in `tests/` and exercise the build tooling, not the game server: `test_image_build.py` builds and pushes the real image with Podman to a throwaway local registry (testcontainers) — it needs Podman plus Docker and significant time/disk, and Podman must trust `localhost:5000` as an insecure registry (see `test-image-build.yaml`). `test_publish.py` unit-tests the publish CLI with mocks. `test_update_server_description.py` tests the container's config-injection script against `tests/assets/ServerDescription.json`. Note that `build/scripts/update_server_description.py` is a standalone script copied into the image; it must stay stdlib-only (the container only has `python3`, no pip packages).
