@@ -5,21 +5,14 @@
   ],
   "schedule": ["* * * * 4"],
   "semanticCommits": "enabled",
-  "enabledManagers": ["poetry"],
+  "enabledManagers": ["pep621"],
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "lockFileMaintenance"],
       "automerge": true
-    },
-    {
-      "matchUpdateTypes": ["major"],
-      "automerge": false
     }
   ],
   "automergeType": "branch",
   "platformAutomerge": false,
-  "rebaseWhen": "behind-base-branch",
-  "prCreation": "immediate",
-  "dependencyDashboard": false,
-  "dependencyDashboardApproval": false
+  "rebaseWhen": "behind-base-branch"
 }

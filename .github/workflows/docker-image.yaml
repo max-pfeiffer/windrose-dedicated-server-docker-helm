@@ -25,11 +25,11 @@ jobs:
         uses: ./.github/actions/setup-environment
       - name: Install dependencies
         run: |
-          poetry install --without dev --no-interaction --no-root
+          uv sync --frozen --no-dev
       - name: Build image with Podman and publish it to Docker Hub
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
           PUBLISH_MANUALLY: ${{ inputs.PUBLISH_MANUALLY }}
-        run: |          
-          poetry run python -m build.publish
+        run: |
+          uv run --no-dev python -m build.publish

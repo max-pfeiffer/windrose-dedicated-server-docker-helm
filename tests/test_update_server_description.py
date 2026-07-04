@@ -302,7 +302,8 @@ def test_argument_parser(server_description_path: Path):
     "fake_invite_code,fake_password,fake_server_name,fake_max_player_count,"
     "fake_user_selected_region,fake_p2p_proxy_address,fake_use_direct_connection,"
     "fake_direct_connection_server_address,fake_direct_connection_server_port,"
-    "fake_direct_connection_proxy_address,expected_result",
+    "fake_direct_connection_proxy_address,fake_auto_load_latest_backup_if_has_broken,"
+    "expected_result",
     [
         (
             "fake_invite_code",
@@ -315,6 +316,7 @@ def test_argument_parser(server_description_path: Path):
             "fake_direct_connection_server_address",
             "28050",
             "fake_direct_connection_proxy_address",
+            "false",
             {
                 "Version": 1,
                 "DeploymentId": "0.10.0.3.104-256f9653",
@@ -334,6 +336,8 @@ def test_argument_parser(server_description_path: Path):
                     "DirectConnectionServerPort": 28050,
                     "DirectConnectionProxyAddress": "fake_direct_connection_"
                     "proxy_address",
+                    "AutoLoadLatestBackupIfHasBroken": False,
+                    "CanLaunchMultipleServerInstances": False,
                 },
             },
         ),
@@ -348,6 +352,7 @@ def test_argument_parser(server_description_path: Path):
             "fake_direct_connection_server_address",
             "28050",
             "fake_direct_connection_proxy_address",
+            "true",
             {
                 "Version": 1,
                 "DeploymentId": "0.10.0.3.104-256f9653",
@@ -367,10 +372,13 @@ def test_argument_parser(server_description_path: Path):
                     "DirectConnectionServerPort": 28050,
                     "DirectConnectionProxyAddress": "fake_direct_connection"
                     "_proxy_address",
+                    "AutoLoadLatestBackupIfHasBroken": True,
+                    "CanLaunchMultipleServerInstances": False,
                 },
             },
         ),
         (
+            None,
             None,
             None,
             None,
@@ -398,6 +406,8 @@ def test_argument_parser(server_description_path: Path):
                     "DirectConnectionServerAddress": "",
                     "DirectConnectionServerPort": -1,
                     "DirectConnectionProxyAddress": "0.0.0.0",
+                    "AutoLoadLatestBackupIfHasBroken": True,
+                    "CanLaunchMultipleServerInstances": False,
                 },
             },
         ),
@@ -418,6 +428,7 @@ def test_update_server_description(
     fake_direct_connection_server_address: str | None,
     fake_direct_connection_server_port: str | None,
     fake_direct_connection_proxy_address: str | None,
+    fake_auto_load_latest_backup_if_has_broken: str | None,
     expected_result: dict,
 ) -> None:
     """Test updating server description.
@@ -435,6 +446,7 @@ def test_update_server_description(
     :param fake_direct_connection_server_address:
     :param fake_direct_connection_server_port:
     :param fake_direct_connection_proxy_address:
+    :param fake_auto_load_latest_backup_if_has_broken:
     :param expected_result:
     :return:
     """
@@ -476,6 +488,11 @@ def test_update_server_description(
         if fake_direct_connection_proxy_address is not None:
             mp.setenv(
                 "DIRECT_CONNECTION_PROXY_ADDRESS", fake_direct_connection_proxy_address
+            )
+        if fake_auto_load_latest_backup_if_has_broken is not None:
+            mp.setenv(
+                "AUTO_LOAD_LATEST_BACKUP_IF_HAS_BROKEN",
+                fake_auto_load_latest_backup_if_has_broken,
             )
         main()
 
@@ -525,6 +542,49 @@ def test_update_server_description_use_direct_connection_disabled(
 
     assert (
         server_description["ServerDescription_Persistent"]["UseDirectConnection"]
+        is False
+    )
+
+
+def test_update_server_description_multiple_server_instances_disabled(
+    server_description_path: Path,
+    tmp_path: Path,
+    mocker: MockerFixture,
+    monkeypatch: MonkeyPatch,
+) -> None:
+    """Always disable launching multiple server instances.
+
+    The test asset enables CanLaunchMultipleServerInstances, so this proves
+    the value is forced to false regardless of the file contents. There is
+    deliberately no environment variable to override this.
+
+    :param server_description_path:
+    :param tmp_path:
+    :param mocker:
+    :param monkeypatch:
+    :return:
+    """
+    mocked_args = MagicMock()
+    mocked_args.server_description = str(server_description_path)
+    mocker.patch(
+        "build.scripts.update_server_description.parse_args", return_value=mocked_args
+    )
+
+    id_file = tmp_path / "persistent_server_id"
+    id_file.write_text("FAKE_PERSISTENT_SERVER_ID")
+
+    monkeypatch.setenv("PERSISTENT_SERVER_ID_FILE", str(id_file))
+    monkeypatch.setenv("WORLD_ISLAND_ID_FILE", str(tmp_path / "world_island_id"))
+
+    main()
+
+    with open(server_description_path) as server_description_file:
+        server_description = json.load(server_description_file)
+
+    assert (
+        server_description["ServerDescription_Persistent"][
+            "CanLaunchMultipleServerInstances"
+        ]
         is False
     )
 

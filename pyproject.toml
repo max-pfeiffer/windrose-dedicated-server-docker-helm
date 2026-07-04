@@ -9,22 +9,22 @@ license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13,<4"
 dependencies = [
-    "click (==8.4.2)",
-    "python-on-whales (==0.81.0)",
-    "steam[client] (==1.4.4)",
+    "click==8.4.2",
+    "python-on-whales==0.81.0",
+    "steam[client]==1.4.4",
 ]
 
 [dependency-groups]
 dev = [
-    "furl (==2.1.4)",
-    "pre-commit (==4.6.0)",
-    "pytest (==9.1.1)",
-    "pytest-mock (==3.15.1)",
-    "pytest-cov (==7.1.0)",
+    "furl==2.1.4",
+    "pre-commit==4.6.0",
+    "pytest==9.1.1",
+    "pytest-mock==3.15.1",
+    "pytest-cov==7.1.0",
 ]
 
-[tool.poetry]
-package-mode = false
+[tool.uv]
+package = false
 
 [tool.ruff]
 src = ["build", "tests"]
@@ -56,7 +56,3 @@ addopts = "-m 'not slow'"
 markers = [
     "slow: slow tests that build the container image and run containers with Podman",
 ]
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"

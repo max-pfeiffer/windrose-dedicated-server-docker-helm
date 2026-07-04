@@ -219,6 +219,9 @@ def main() -> None:
     direct_connection_proxy_address: str | None = getenv(
         "DIRECT_CONNECTION_PROXY_ADDRESS"
     )
+    auto_load_latest_backup_if_has_broken: bool | None = get_bool_env(
+        "AUTO_LOAD_LATEST_BACKUP_IF_HAS_BROKEN"
+    )
 
     world_island_id: str | None = get_world_island_id(current_worlds)
     if world_island_id is not None:
@@ -275,6 +278,18 @@ def main() -> None:
         server_description["ServerDescription_Persistent"][
             "DirectConnectionProxyAddress"
         ] = direct_connection_proxy_address
+
+    if auto_load_latest_backup_if_has_broken is not None:
+        server_description["ServerDescription_Persistent"][
+            "AutoLoadLatestBackupIfHasBroken"
+        ] = auto_load_latest_backup_if_has_broken
+
+    # The container runs exactly one server instance per data volume, so
+    # launching multiple instances from the same installation must stay
+    # disabled.
+    server_description["ServerDescription_Persistent"][
+        "CanLaunchMultipleServerInstances"
+    ] = False
 
     with open(server_description_file_path, "w") as server_description_file:
         json.dump(server_description, server_description_file)

@@ -1,4 +1,4 @@
-[![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![codecov](https://codecov.io/gh/max-pfeiffer/windrose-dedicated-server-docker-helm/graph/badge.svg?token=4xXsgY0nah)](https://codecov.io/gh/max-pfeiffer/windrose-dedicated-server-docker-helm)
 [![Code Quality](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/code-quality.yaml/badge.svg)](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/actions/workflows/code-quality.yaml)
@@ -50,6 +50,7 @@ You can configure the Windrose server with the following environment variables:
 * `DIRECT_CONNECTION_SERVER_ADDRESS` - address for direct connection. For future purposes. Not used now.
 * `DIRECT_CONNECTION_SERVER_PORT` - port for direct connection. Should be available for TCP and UDP connection if UseDirectConnection is true.
 * `DIRECT_CONNECTION_PROXY_ADDRESS` - can be used to choose specified network on computer where server with direct connection is running. 0.0.0.0 should be used by default.
+* `AUTO_LOAD_LATEST_BACKUP_IF_HAS_BROKEN` - if true, the server automatically loads the latest backup if the world save is broken.
 * `WORLD_ISLAND_ID` - ID of the world the server should load. Only needed if you want to switch to another world,
    see [Importing a save game](#importing-a-save-game).
 

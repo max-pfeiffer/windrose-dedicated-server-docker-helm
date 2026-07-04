@@ -12,13 +12,13 @@ Docker image and Helm chart for running the Windrose dedicated game server (a Wi
 
 ## Commands
 
-Python tooling uses Poetry (Python >= 3.13):
+Python tooling uses uv (Python >= 3.13):
 
 ```shell
-poetry install --with dev --no-interaction --no-root
+uv sync
 
 # Run the fast unit tests (tests marked "slow" are deselected by default)
-poetry run pytest
+uv run pytest
 
 # Run the slow tests: image build/push to a throwaway local registry plus
 # container persistence checks (requires only Podman; slow — the build
@@ -26,17 +26,18 @@ poetry run pytest
 # on a non-amd64 machine the tests automatically pick the first Podman
 # system connection with an amd64 host for build, registry, and test
 # containers. Set PODMAN_CONNECTION to pick a connection explicitly.
-poetry run pytest -m slow
+uv run pytest -m slow
 
 # Run a single test (add -m slow for tests in slow-marked modules, otherwise
 # the default addopts deselect them)
-poetry run pytest tests/test_utils.py::test_create_tag
+uv run pytest tests/test_utils.py::test_create_tag
 
-# Coverage as in CI (CI appends the slow tests with -m slow --cov-append)
-poetry run pytest --cov build --cov-report=xml
+# Coverage as in CI (fast and slow tests run in separate parallel workflows,
+# each uploading its own report to Codecov; the slow workflow adds -m slow)
+uv run pytest --cov build --cov-report=xml
 
 # Lint/format (ruff via pre-commit, same as the code-quality CI job)
-poetry run pre-commit run -a
+uv run pre-commit run -a
 
 # Helm chart
 helm lint charts/windrose
@@ -51,7 +52,7 @@ Repo releases are automated with release-please (`.github/workflows/release.yaml
 
 Docker image and Helm chart releases are separate processes driven independently:
 
-- `.github/workflows/publish.yaml` runs nightly and calls `docker-image.yaml`, which runs `poetry run python -m build.publish`. That CLI queries Steam for the current build ID of the Windrose public branch (`build/utils.py:get_windrose_build_id`), and if no `build-<buildid>` tag exists on Docker Hub yet, builds the image with Podman and pushes it tagged `build-<buildid>` and `latest`. `publish-manual.yaml` (workflow_dispatch) forces a build via the `--publish-manually` flag.
+- `.github/workflows/publish.yaml` runs nightly and calls `docker-image.yaml`, which runs `uv run python -m build.publish`. That CLI queries Steam for the current build ID of the Windrose public branch (`build/utils.py:get_windrose_build_id`), and if no `build-<buildid>` tag exists on Docker Hub yet, builds the image with Podman and pushes it tagged `build-<buildid>` and `latest`. `publish-manual.yaml` (workflow_dispatch) forces a build via the `--publish-manually` flag.
 - The Helm chart is published by chart-releaser on push to `main` when `charts/**` changes (`helm-release.yaml`). **Bump `version` in `charts/windrose/Chart.yaml` for any chart change**, or the release job will fail on the existing version.
 
 ## Docker image architecture
