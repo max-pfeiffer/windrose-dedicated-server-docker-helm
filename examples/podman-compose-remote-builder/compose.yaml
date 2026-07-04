@@ -1,0 +1,45 @@
+name: windrose-remote-builder
+
+services:
+  init-container:
+    image: alpine:3.23
+    container_name: "windrose-remote-builder-init"
+    user: root
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "chown -R 10001:10001 /srv/windrose/R5/Saved"
+    volumes:
+      - type: volume
+        source: save_dir
+        target: "/srv/windrose/R5/Saved"
+  windrose-server:
+    # A locally built image on the remote builder, e.g.:
+    # podman --connection remotebuilder build --tag windrose:test build
+    image: "${WINDROSE_IMAGE:-localhost/windrose:test}"
+    pull_policy: never
+    container_name: "windrose-remote-builder-server"
+    depends_on:
+      init-container:
+        condition: service_completed_successfully
+    environment:
+      PASSWORD: "supersecret"
+      SERVER_NAME: "Atlantis"
+      MAX_PLAYER_COUNT: "5"
+      USER_SELECTED_REGION: "EU"
+      USE_DIRECT_CONNECTION: "true"
+      DIRECT_CONNECTION_SERVER_PORT: "28050"
+      # Set this to switch to another world, e.g. an imported save game. It needs to match a world
+      # directory name in R5/Saved/SaveProfiles/Default/RocksDB_v2/<game_version>/Worlds on the volume.
+      # WORLD_ISLAND_ID: "1EDB437B925C493C86998DADB3D5CA90"
+    ports:
+      - "28050:28050/tcp"
+      - "28050:28050/udp"
+    volumes:
+      - type: volume
+        source: save_dir
+        target: "/srv/windrose/R5/Saved"
+
+volumes:
+  save_dir:
+    name: "windrose-remote-builder-save-dir"
