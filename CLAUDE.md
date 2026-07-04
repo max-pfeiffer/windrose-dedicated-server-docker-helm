@@ -32,7 +32,8 @@ poetry run pytest -m slow
 # the default addopts deselect them)
 poetry run pytest tests/test_utils.py::test_create_tag
 
-# Coverage as in CI (CI appends the slow tests with -m slow --cov-append)
+# Coverage as in CI (fast and slow tests run in separate parallel workflows,
+# each uploading its own report to Codecov; the slow workflow adds -m slow)
 poetry run pytest --cov build --cov-report=xml
 
 # Lint/format (ruff via pre-commit, same as the code-quality CI job)
