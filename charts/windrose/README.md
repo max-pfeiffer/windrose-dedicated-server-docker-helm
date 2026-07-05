@@ -12,10 +12,10 @@ If you want to run Windrose on a bare metal Kubernetes cluster, I recommend read
 about that topic.
 
 ### Helm
-You can run multiple server instance with each Helm installation. Please be aware that with a StatefulSet Kubernetes
-starts additional instances only after the first instance is in ready state. And Windrose server startup is slow,
-so it might take a while until your Windrose server fleet is up and running completely.
-It might better suit your needs to install multiple StatefulSets with separate Helm releases.
+You can run multiple server instances with each Helm installation. The StatefulSet starts all instances in
+parallel (`podManagementPolicy: Parallel`), so additional instances do not have to wait for the first one to
+become ready. Windrose server startup is still slow (mainly world generation), so it might take a while until
+your Windrose server fleet is up and running completely.
 
 The installation is done as follows:
 ```shell
@@ -81,6 +81,10 @@ startupProbe:
 ### Windrose server config
 Tweak the Windrose server config to your liking. You can add a list of server to `instances`. Please be aware that the
 configuration of resources and ports are shared by these instances.
+
+**Warning:** instances are matched to pods and their persistent volumes by list position. Only append new
+instances at the end of the list. Removing or reordering existing entries shifts the remaining instances onto
+other instances' saved worlds.
 ```yaml
 # You can choose to run multiple instances of Windrose dedicated servers here.
 # For a new instance add another entry to this list.
@@ -128,8 +132,10 @@ metadata:
 type: Opaque
 stringData:
   your-helm-release-name-0: |
-    PASSWORD=your-password
+    PASSWORD='your-password'
 ```
+The file is sourced by the container's entrypoint shell script, so single-quote the password if it contains
+spaces or other characters that are special to the shell.
 If you want to run multiple instances, add additional data entries with a password for your instances i.e.
 `your-helm-release-name-1`, `your-helm-release-name-2` and so on. To be sure about the secret data structure you can 
 render all Kubernetes resources with Helm **without** specifying an existing secret:
@@ -154,7 +160,7 @@ spec:
       engineVersion: v2
       data:
         windrose-dedicated-server-0: |
-          PASSWORD={{ .password }}
+          PASSWORD='{{ .password }}'
   data:
     - secretKey: password
       remoteRef:

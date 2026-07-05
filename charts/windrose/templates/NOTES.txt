@@ -1,3 +1,13 @@
-Access the instance through the following services:
-1. Headless Service
-2. Pod Services
+Your Windrose dedicated server instances and their services:
+{{ range $i, $instance := .Values.instances }}
+  {{ $instance.name }}: {{ include "windrose.fullname" $ }}-{{ $i }}
+{{- end }}
+
+Get the external IP addresses of the instance services with:
+
+  kubectl get services --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+Server startup is slow on first start because the world needs to be generated.
+Watch the progress with:
+
+  kubectl logs --namespace {{ .Release.Namespace }} --follow {{ include "windrose.fullname" . }}-0
