@@ -57,12 +57,12 @@ Docker image and Helm chart releases are separate processes driven independently
 
 ## Docker image architecture
 
-`build/Containerfile` is a two-stage build: the install stage downloads the Windows server files with steamcmd (`+@sSteamCmdForcePlatformType windows`); the production stage is based on `pfeiffermax/debian-wine`, runs as unprivileged user `windrose` (UID/GID 10001), and initializes a Wine prefix under Xvfb at build time.
+`build/Containerfile` (the file used by the publish CLI) is based on `debian:trixie-slim`, copies the native Linux server files from the official `windroseserver/windroseserver` image, and runs as unprivileged user `windrose` (UID/GID 10001) with `start_linux.sh` as the entrypoint. `build/Containerfile.wine` is the legacy Wine-based build (Windows server files via steamcmd, `pfeiffermax/debian-wine` base, Wine prefix initialized under Xvfb); it is kept for reference but no longer used by the build tooling.
 
-Runtime flow (`build/scripts/start.sh`, the entrypoint):
+Runtime flow (`build/scripts/start_linux.sh`, the entrypoint):
 1. If `CONFIG_FILE_PATH` / `SECRET_FILE_PATH` are set, source those files as environment variables — this is how the Helm chart injects per-instance config.
 2. Run `update_server_description.py`, which writes env vars (`SERVER_NAME`, `PASSWORD`, `INVITE_CODE`, `MAX_PLAYER_COUNT`, etc.) into the server's `ServerDescription.json` and pins `WorldIslandId` to the existing world save if exactly one exists.
-3. Start the server executable with `xvfb-run wine`, then tail the server log file (the wine process itself is backgrounded; the tail keeps the container alive).
+3. Start the native Linux server binary (`R5/Binaries/Linux/WindroseServer-Linux-Shipping`) in the foreground. (The legacy `start.sh` used by the Wine image instead runs the Windows executable via `xvfb-run wine` and tails the server log.)
 
 All persistent state lives in `/srv/windrose/R5/Saved` — that path must be volume-mounted.
 

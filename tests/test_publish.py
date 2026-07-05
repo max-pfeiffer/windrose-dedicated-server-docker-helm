@@ -9,14 +9,13 @@ from build.publish import main
 from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 
-FAKE_BUILD_ID: str = "98765"
-FAKE_TAG: str = f"build-{FAKE_BUILD_ID}"
+FAKE_BUILD_TAG: str = "0.10.0.7.33-372c3516"
 FAKE_REGISTRY: str = "localhost:5000"
 FAKE_USERNAME: str = "testuser"
 FAKE_TOKEN: str = "testtoken"
 FAKE_CONTEXT: Path = Path("/fake/build")
 FAKE_IMAGE_REFERENCE_VERSION: str = (
-    f"{FAKE_REGISTRY}/pfeiffermax/windrose-dedicated-server:{FAKE_TAG}"
+    f"{FAKE_REGISTRY}/pfeiffermax/windrose-dedicated-server:{FAKE_BUILD_TAG}"
 )
 FAKE_IMAGE_REFERENCE_LATEST: str = (
     f"{FAKE_REGISTRY}/pfeiffermax/windrose-dedicated-server:latest"
@@ -50,15 +49,16 @@ def patch_publish_dependencies(
     """
     tag_exists_value: bool = getattr(request, "param", False)
 
-    mocker.patch("build.publish.get_windrose_build_id", return_value=FAKE_BUILD_ID)
+    mocker.patch(
+        "build.publish.get_official_image_build_tag", return_value=FAKE_BUILD_TAG
+    )
     mocker.patch("build.publish.tag_exists", return_value=tag_exists_value)
     mocker.patch("build.publish.get_context", return_value=FAKE_CONTEXT)
-    mocker.patch("build.publish.create_tag", return_value=FAKE_TAG)
     mocker.patch(
         "build.publish.get_image_reference",
         side_effect=lambda registry, tag: (
             FAKE_IMAGE_REFERENCE_VERSION
-            if tag == FAKE_TAG
+            if tag == FAKE_BUILD_TAG
             else FAKE_IMAGE_REFERENCE_LATEST
         ),
     )
@@ -191,28 +191,6 @@ def test_main_build_targets_linux_amd64(
     assert "linux/amd64" in kwargs["platforms"]
 
 
-def test_main_build_uses_production_target(
-    patch_publish_dependencies: MagicMock,
-    cli_runner: CliRunner,
-) -> None:
-    """Verify that :meth:`buildx.build` targets the ``production-image`` stage.
-
-    :param patch_publish_dependencies: Fixture yielding ``mock_podman_client``.
-    :type patch_publish_dependencies: unittest.mock.MagicMock
-    :param cli_runner: Click CLI test runner.
-    :type cli_runner: click.testing.CliRunner
-    :return: None
-    :rtype: None
-    """
-    mock_podman_client = patch_publish_dependencies
-
-    result: Result = cli_runner.invoke(main, env=_BASE_ENV)
-
-    assert result.exit_code == 0
-    _, kwargs = mock_podman_client.buildx.build.call_args
-    assert kwargs["target"] == "production-image"
-
-
 def test_main_build_uses_containerfile(
     patch_publish_dependencies: MagicMock,
     cli_runner: CliRunner,
@@ -306,11 +284,11 @@ def test_main_build_streams_logs(
     assert FAKE_BUILD_LOG[0] in result.output
 
 
-def test_main_output_contains_build_id(
+def test_main_output_contains_build_tag(
     patch_publish_dependencies: MagicMock,
     cli_runner: CliRunner,
 ) -> None:
-    """Verify that the CLI output includes the current Windrose server build ID.
+    """Verify that the CLI output includes the current Windrose server build tag.
 
     :param patch_publish_dependencies: Fixture yielding ``mock_podman_client``.
     :type patch_publish_dependencies: unittest.mock.MagicMock
@@ -322,7 +300,7 @@ def test_main_output_contains_build_id(
     result: Result = cli_runner.invoke(main, env=_BASE_ENV)
 
     assert result.exit_code == 0
-    assert FAKE_BUILD_ID in result.output
+    assert FAKE_BUILD_TAG in result.output
 
 
 @pytest.mark.parametrize("patch_publish_dependencies", [True], indirect=True)

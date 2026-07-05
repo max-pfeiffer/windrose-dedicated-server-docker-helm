@@ -6,11 +6,10 @@ import click
 from python_on_whales import DockerClient
 
 from build.utils import (
-    create_tag,
     get_context,
     get_image_reference,
+    get_official_image_build_tag,
     get_podman_client,
-    get_windrose_build_id,
     tag_exists,
 )
 
@@ -52,19 +51,22 @@ def main(
     """
     context: Path = get_context()
 
-    click.echo("Checking Windrose server build ID for release branch...")
-    current_windrose_server_build_id = get_windrose_build_id()
-    click.echo(f"Current Windrose server build ID: {current_windrose_server_build_id}")
+    click.echo("Checking build tag of the official Windrose server image...")
+    current_windrose_server_build_tag: str = get_official_image_build_tag()
+    click.echo(
+        f"Current Windrose server build tag: {current_windrose_server_build_tag}"
+    )
 
-    if not publish_manually and tag_exists(current_windrose_server_build_id):
+    if not publish_manually and tag_exists(current_windrose_server_build_tag):
         click.echo(
-            "Image for this build ID already exists. Skipping container image build..."
+            "Image for this build tag already exists. Skipping container image build..."
         )
     else:
         click.echo("Building Windrose server container image...")
 
-        tag = create_tag(current_windrose_server_build_id)
-        image_reference_version: str = get_image_reference(registry, tag)
+        image_reference_version: str = get_image_reference(
+            registry, current_windrose_server_build_tag
+        )
         image_reference_latest: str = get_image_reference(registry, "latest")
 
         podman_client: DockerClient = get_podman_client()
@@ -81,7 +83,6 @@ def main(
         build_log_stream = podman_client.buildx.build(
             context_path=context,
             file=context / "Containerfile",
-            target="production-image",
             tags=[image_reference_version, image_reference_latest],
             platforms=["linux/amd64"],
             stream_logs=True,

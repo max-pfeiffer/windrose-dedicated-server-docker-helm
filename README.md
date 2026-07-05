@@ -13,10 +13,10 @@
 This Docker image provides a [Windrose](https://playwindrose.com/) dedicated game server.
 You will find here also a [Helm Chart](https://helm.sh/) for running a Windrose dedicated server on
 [Kubernetes container orchestration system](https://kubernetes.io/).
-This Windows server is run on Debian Trixie with [Wine compatibility layer](https://www.winehq.org/).
+This Windrose dedicated server is run on Debian Trixie.
 
-My automation checks the [Windrose public branch](https://steamdb.info/app/4129620/depots/?branch=public) every
-night. If a new release was published by Kraken Express, a new Docker image will be built
+My automation checks the [Windrose official Image build](https://hub.docker.com/r/windroseserver/windroseserver) every
+night. If a new Image was published by Kraken Express, a new Docker image will be built
 with this new version. Just use the `latest` tag and you will always have an up-to-date Docker image. No need to
 manually run any server updates and mess around with your Docker image. It's that simple. :smiley:
 
@@ -24,6 +24,7 @@ Have a look at the [docker compose example](examples/docker-compose/compose.yaml
 [its documentation](examples/docker-compose#automated-server-updates).
 There you can see how a server update can be automated with a simple script.
 Also check out [my guide for setting up a Windrose dedicated server with Docker and Docker Compose](https://max-pfeiffer.github.io/a-guide-for-setting-up-a-windrose-dedicated-server-using-docker-and-docker-compose.html). 
+I also did an in [depth analysis of the official Windrose Docker image](https://max-pfeiffer.github.io/kraken-express-published-an-official-windrose-dedicated-server-docker-image.html).
 
 Please keep in mind that the Windrose server is currently still in development as the game is in early access state.
 During the last weeks I already encountered some breaking changes for instance the directory of the world saves changed.
@@ -34,6 +35,12 @@ And I hope Kraken Express will improve the server so it can be run in a containe
 **Docker Hub:** https://hub.docker.com/r/pfeiffermax/windrose-dedicated-server
 
 **GitHub Repository:** https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm
+
+## IMPORTANT CHANGE SINCE V2.0.0 (5.7.2026)
+Kraken Express published an [official Docker Image with Linux binaries](https://hub.docker.com/r/windroseserver/windroseserver)
+just recently. So my image is using these Linux binaries from now on. Let's hope Kraken Express updates this image when
+they publish a new Game client via Steam. I declared that as a breaking change as this might break something depending
+on your setup.
 
 ## Usage
 ### Configuration
