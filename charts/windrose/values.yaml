@@ -1,14 +1,15 @@
-# Default values for rust.
+# Default values for windrose.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
   repository: "pfeiffermax/windrose-dedicated-server"
-  # This sets the pull policy for images.
-  pullPolicy: IfNotPresent
+  # This sets the pull policy for images. With the default "latest" tag, Always is required
+  # so nodes pick up new image builds; if you pin a build-<buildid> tag, IfNotPresent is fine.
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  # Please see Docker Hub for available tags: https://hub.docker.com/r/pfeiffermax/rust-game-server/tags
+  # Please see Docker Hub for available tags: https://hub.docker.com/r/pfeiffermax/windrose-dedicated-server/tags
   tag: "latest"
 
 # This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -40,10 +41,8 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+# Headless service governing the StatefulSet, more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 headlessService:
-  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
-  type: ClusterIP
   metadata:
     annotations: {}
 
@@ -86,6 +85,9 @@ windroseDedicatedServer:
   port: 28050
   # Size of the volume the server uses for its saves directory.
   volumeStorageSize: "1Gi"
+  # Storage class for the saves directory volume claim of each instance.
+  # If left empty, the cluster's default storage class is used.
+  storageClassName: ""
   # Name of the existing secret to use for the server password.
   # If this is set, windroseDedicatedServer.password will be ignored.
   # The existing secret needs to have stored Windrose server password under the key password.
@@ -93,6 +95,9 @@ windroseDedicatedServer:
 
 # You can choose to run multiple instances of Windrose dedicated servers here.
 # For a new instance add another entry to this list.
+# WARNING: instances are matched to pods and their persistent volumes by list position.
+# Only append new instances at the end of the list. Removing or reordering existing
+# entries shifts the remaining instances onto other instances' saved worlds.
 instances:
     # Name of your server. Helpful if invite codes look similar
   - name: "WindroseServer"
@@ -112,6 +117,9 @@ instances:
     # Set this to switch to another world, e.g. an imported save game. If left empty, the server
     # keeps loading the world it used before or generates a new one on first start.
     worldIslandId: ""
+    # If "true", the server automatically loads the latest backup if the world save is broken.
+    # Use the quoted strings "true" or "false"; if left empty, the server keeps its current setting.
+    autoLoadLatestBackupIfHasBroken: ""
     # Service configuration for this instance
     service:
       type: LoadBalancer

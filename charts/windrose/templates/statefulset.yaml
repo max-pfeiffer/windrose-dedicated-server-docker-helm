@@ -7,15 +7,20 @@ metadata:
 spec:
   serviceName: {{ include "windrose.fullname" . }}
   replicas: {{ len .Values.instances }}
+  podManagementPolicy: Parallel
   selector:
     matchLabels:
       {{- include "windrose.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if not .Values.windroseDedicatedServer.existingSecret }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- include "windrose.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
@@ -81,8 +86,10 @@ spec:
               mountPath: "/srv/windrose/R5/Saved"
             - name: config
               mountPath: "/srv/windrose/config"
+              readOnly: true
             - name: secret
               mountPath: "/srv/windrose/secret"
+              readOnly: true
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -108,6 +115,9 @@ spec:
     spec:
       accessModes:
         - "ReadWriteOnce"
+      {{- with .Values.windroseDedicatedServer.storageClassName }}
+      storageClassName: {{ . | quote }}
+      {{- end }}
       resources:
         requests:
           storage: {{ .Values.windroseDedicatedServer.volumeStorageSize }}
