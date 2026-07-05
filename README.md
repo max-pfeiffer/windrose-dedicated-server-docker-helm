@@ -24,7 +24,7 @@ Have a look at the [docker compose example](examples/docker-compose/compose.yaml
 [its documentation](examples/docker-compose#automated-server-updates).
 There you can see how a server update can be automated with a simple script.
 Also check out [my guide for setting up a Windrose dedicated server with Docker and Docker Compose](https://max-pfeiffer.github.io/a-guide-for-setting-up-a-windrose-dedicated-server-using-docker-and-docker-compose.html). 
-I also did an in [depth analysis of the official Windrose Docker image](https://max-pfeiffer.github.io/kraken-express-published-an-official-windrose-dedicated-server-docker-image.html).
+I also did an [in-depth analysis of the official Windrose Docker image](https://max-pfeiffer.github.io/kraken-express-published-an-official-windrose-dedicated-server-docker-image.html).
 
 Please keep in mind that the Windrose server is currently still in development as the game is in early access state.
 During the last weeks I already encountered some breaking changes for instance the directory of the world saves changed.
@@ -36,7 +36,7 @@ And I hope Kraken Express will improve the server so it can be run in a containe
 
 **GitHub Repository:** https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm
 
-## IMPORTANT CHANGE SINCE V2.0.0 (5.7.2026)
+## IMPORTANT CHANGE SINCE V2.0.0 (5.7.2026, Image Tag 0.10.0.7.33-372c3516)
 Kraken Express published an [official Docker Image with Linux binaries](https://hub.docker.com/r/windroseserver/windroseserver)
 just recently. So my image is using these Linux binaries from now on. Let's hope Kraken Express updates this image when
 they publish a new Game client via Steam. I declared that as a breaking change as this might break something depending
@@ -45,11 +45,11 @@ on your setup.
 ## Usage
 ### Configuration
 You can configure the Windrose server with the following environment variables:
-* `INVITE_CODE`- invite code to find your server. 0-9, a-z and A-Z symbols are allowed. Should contain at least 6 symbols. Case sensitive.
+* `INVITE_CODE` - invite code to find your server. 0-9, a-z and A-Z symbols are allowed. Should contain at least 6 symbols. Case sensitive.
 * `PASSWORD` - this is the password.
 * `SERVER_NAME` - name of your server. Helpful if invite codes look similar
 * `MAX_PLAYER_COUNT` - maximum number of simultaneous players on your server.
-* `USER_SELECTED_REGION`- specifies the region for the Connection Service. Supported options: SEA, CIS, EU
+* `USER_SELECTED_REGION` - specifies the region for the Connection Service. Supported options: SEA, CIS, EU
    (EU covers both EU & NA). If left empty, the server will automatically detect and select the optimal region based on
    latency. If desired region is specified (for example, EU), the server will use that region exclusively.
 * `P2P_PROXY_ADDRESS` - IP Address for listening sockets.
