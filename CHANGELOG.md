@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.0.0](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/compare/1.3.0...2.0.0) (2026-07-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* added native Linux support for running the Windrose dedicated server
+
+### Features
+
+* added native Linux support for running the Windrose dedicated server ([6416263](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/commit/641626388dc421bd14afabbfec7129f329a7ba93))
+* added new environment variable AUTO_LOAD_LATEST_BACKUP_IF_HAS_BROKEN ([9a4fee6](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/commit/9a4fee64aafce82d06b91c6d6c4030d465c648d4))
+
+
+### Bug Fixes
+
+* renovate bot config ([ccc0fb9](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/commit/ccc0fb9bab76c8b2045134a3751e428aab7a4702))
+
+
+### Documentation
+
+* updated docs with info about the new image version ([f814215](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/commit/f8142151af13633fb8ff5b53acc5993f26b8c17f))
+
 ## [1.3.0](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/compare/1.2.0...1.3.0) (2026-07-04)
 
 
