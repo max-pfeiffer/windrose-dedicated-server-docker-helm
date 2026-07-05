@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 import pytest
 import requests
 from build.publish import main
-from build.utils import create_tag, get_image_reference, get_podman_client
+from build.utils import get_image_reference, get_podman_client
 from click.testing import CliRunner, Result
 from python_on_whales import DockerClient
 
@@ -241,16 +241,16 @@ def published_image(
     )
     assert result.exit_code == 0, result.output
 
-    # The publish CLI already queried Steam for the current build id, so it is
-    # reused from the CLI output instead of a second Steam round trip.
+    # The publish CLI already resolved the official image's build tag, so it
+    # is reused from the CLI output instead of a second Docker Hub round trip.
     match: re.Match[str] | None = re.search(
-        r"Current Windrose server build ID: (\S+)", result.output
+        r"Current Windrose server build tag: (\S+)", result.output
     )
     assert match is not None, result.output
 
     return PublishedImage(
         registry=registry,
-        tag=create_tag(match.group(1)),
+        tag=match.group(1),
         image_reference_latest=get_image_reference(registry, "latest"),
     )
 

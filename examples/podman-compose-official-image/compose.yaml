@@ -1,0 +1,73 @@
+name: windrose-official-image
+
+services:
+  init-container:
+    image: alpine:3.23
+    container_name: "windrose-official-image-init"
+    user: root
+    # Seeds ServerDescription.json on the save volume on first start (the
+    # official image has no environment variable handling, the server reads
+    # its config only from that file) and chowns the volume to the
+    # unprivileged container user ue_user (UID 1000). Edit the config here,
+    # remove the file from the volume (or the whole volume) to re-seed it.
+    command:
+      - "/bin/sh"
+      - "-c"
+      - |
+        set -eu
+        if [ ! -f /home/ue_user/app/R5/Saved/ServerDescription.json ]; then
+          PERSISTENT_SERVER_ID="$$(tr -d - < /proc/sys/kernel/random/uuid | tr a-f A-F)"
+          cat > /home/ue_user/app/R5/Saved/ServerDescription.json <<EOF
+        {
+            "Version": 1,
+            "ServerDescription_Persistent":
+            {
+                "PersistentServerId": "$${PERSISTENT_SERVER_ID}",
+                "InviteCode": "",
+                "IsPasswordProtected": true,
+                "Password": "supersecret",
+                "ServerName": "Atlantis",
+                "WorldIslandId": "",
+                "MaxPlayerCount": 5,
+                "UserSelectedRegion": "EU",
+                "P2pProxyAddress": "127.0.0.1",
+                "UseDirectConnection": true,
+                "DirectConnectionServerAddress": "",
+                "DirectConnectionServerPort": 28050,
+                "DirectConnectionProxyAddress": "0.0.0.0",
+                "AutoLoadLatestBackupIfHasBroken": true,
+                "CanLaunchMultipleServerInstances": false
+            }
+        }
+        EOF
+        fi
+        chown -R 1000:1000 /home/ue_user/app/R5/Saved
+    volumes:
+      - type: volume
+        source: save_dir
+        target: "/home/ue_user/app/R5/Saved"
+  windrose-server:
+    image: "docker.io/windroseserver/windroseserver:latest"
+    container_name: "windrose-official-image-server"
+    depends_on:
+      init-container:
+        condition: service_completed_successfully
+    # The image ships an empty ServerDescription.json baked into the container
+    # filesystem. Symlink it to the seeded copy on the save volume so the
+    # server identity survives container recreation (a bind mount of the file
+    # would resolve on the remote host with a remote connection).
+    command:
+      - "/bin/bash"
+      - "-c"
+      - "ln -sf Saved/ServerDescription.json R5/ServerDescription.json && exec ./WindroseServer.sh"
+    ports:
+      - "28050:28050/tcp"
+      - "28050:28050/udp"
+    volumes:
+      - type: volume
+        source: save_dir
+        target: "/home/ue_user/app/R5/Saved"
+
+volumes:
+  save_dir:
+    name: "windrose-official-image-save-dir"
