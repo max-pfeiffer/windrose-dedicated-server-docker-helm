@@ -14,6 +14,9 @@ data:
     {{- if $instance.worldIslandId }}
     WORLD_ISLAND_ID='{{ $instance.worldIslandId }}'
     {{- end }}
+    {{- if $instance.autoLoadLatestBackupIfHasBroken }}
+    AUTO_LOAD_LATEST_BACKUP_IF_HAS_BROKEN='{{ $instance.autoLoadLatestBackupIfHasBroken }}'
+    {{- end }}
     USE_DIRECT_CONNECTION=true
     DIRECT_CONNECTION_SERVER_PORT={{ $.Values.windroseDedicatedServer.port }}
     DIRECT_CONNECTION_PROXY_ADDRESS=0.0.0.0

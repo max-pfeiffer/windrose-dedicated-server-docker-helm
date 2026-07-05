@@ -107,6 +107,9 @@ instances:
     # Set this to switch to another world, e.g. an imported save game. If left empty, the server
     # keeps loading the world it used before or generates a new one on first start.
     worldIslandId: ""
+    # If "true", the server automatically loads the latest backup if the world save is broken.
+    # Use the quoted strings "true" or "false"; if left empty, the server keeps its current setting.
+    autoLoadLatestBackupIfHasBroken: ""
     # Service configuration for this instance
     service:
       type: LoadBalancer
