@@ -85,6 +85,9 @@ windroseDedicatedServer:
   port: 28050
   # Size of the volume the server uses for its saves directory.
   volumeStorageSize: "1Gi"
+  # Storage class for the saves directory volume claim of each instance.
+  # If left empty, the cluster's default storage class is used.
+  storageClassName: ""
   # Name of the existing secret to use for the server password.
   # If this is set, windroseDedicatedServer.password will be ignored.
   # The existing secret needs to have stored Windrose server password under the key password.

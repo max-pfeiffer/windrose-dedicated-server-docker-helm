@@ -115,6 +115,9 @@ spec:
     spec:
       accessModes:
         - "ReadWriteOnce"
+      {{- with .Values.windroseDedicatedServer.storageClassName }}
+      storageClassName: {{ . | quote }}
+      {{- end }}
       resources:
         requests:
           storage: {{ .Values.windroseDedicatedServer.volumeStorageSize }}
