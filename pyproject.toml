@@ -1,6 +1,6 @@
 [project]
 name = "windrose-dedicated-server-docker-helm"
-version = "2.0.0"
+version = "2.1.0"
 description = "Windrose dedicated server - Docker image and Helm chart"
 authors = [
     {name = "Max Pfeiffer",email = "max@maxpfeiffer.ch"}
