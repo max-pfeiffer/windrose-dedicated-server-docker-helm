@@ -13,7 +13,7 @@
 This Docker image provides a [Windrose](https://playwindrose.com/) dedicated game server.
 You will find here also a [Helm Chart](https://helm.sh/) for running a Windrose dedicated server on
 [Kubernetes container orchestration system](https://kubernetes.io/).
-This Windrose dedicated server is run on Debian Trixie.
+This Windrose dedicated server is run with **Linux native binaries** on Debian Trixie.
 
 My automation checks the [Windrose official Image build](https://hub.docker.com/r/windroseserver/windroseserver) every
 night. If a new Image was published by Kraken Express, a new Docker image will be built
@@ -81,7 +81,10 @@ docker run -it --publish 28050:28050/tcp --publish 28050:28050/udp --env SERVER_
 ```
 
 ### Docker Compose
-Please have a look at the [docker compose example](examples/docker-compose/README.md).
+Please have a look at the [docker compose example](examples/docker-compose/README.md). The docker compose example 
+contains [a Web based file manager](https://github.com/max-pfeiffer/file-manager) for managing your save games in a very 
+convenient way. There are very detailed instructions for 
+[transferring a local save game to the server in the instructions](examples/docker-compose/README.md#transferring-a-local-save-game-to-the-server).
 
 ## Helm chart
 If you would like to run the Windrose server in your [Kubernetes](https://kubernetes.io/) cluster, I provide a
