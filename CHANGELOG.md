@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.1.0](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/compare/2.0.0...2.1.0) (2026-07-15)
+
+
+### Features
+
+* added file-manager to docker compose setup for managing save games ([a9f3c2a](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/commit/a9f3c2adae69e0d8f9a46723f5eaaa31dffd75f7))
+
+
+### Documentation
+
+* added build for breaking change and fixed some typos ([968d148](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/commit/968d148694e6b8862c094255ff7e50719de6a5a5))
+* added build for breaking change and fixed some typos ([e63915a](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/commit/e63915ab7c4b4d1874e1a41b31f90819e36ba318))
+* added instructions for managing save games with file-manager ([889cadc](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/commit/889cadcee27be7d03bfc97e59053b1ef1134c112))
+
 ## [2.0.0](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/compare/1.3.0...2.0.0) (2026-07-05)
 
 
