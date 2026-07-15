@@ -34,6 +34,21 @@ services:
       - type: volume
         source: save_dir
         target: "/srv/windrose/R5/Saved"
+  file-manager:
+    image: "pfeiffermax/file-manager:latest"
+    container_name: "file-manager"
+    user: root
+    depends_on:
+      - windrose-server
+    ports:
+      - "8080:8080/tcp"
+    environment:
+      AUTH_METHOD: "none"
+      FILES_ROOT: "/srv/windrose/R5/Saved"
+    volumes:
+      - type: volume
+        source: save_dir
+        target: "/srv/windrose/R5/Saved"
 
 volumes:
   save_dir:
