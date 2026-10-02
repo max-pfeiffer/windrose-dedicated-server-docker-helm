@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/compare/2.1.0...2.1.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency click to v8.5.0 ([#35](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/issues/35)) ([c4e5f31](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/commit/c4e5f312fc8aa62b65c203ad2d51302ac5ecd26a))
+
 ## [2.1.0](https://github.com/max-pfeiffer/windrose-dedicated-server-docker-helm/compare/2.0.0...2.1.0) (2026-07-15)
 
 
